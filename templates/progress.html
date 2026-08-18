@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ t.progress_title }} - {{ t.brand_name }}</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4faf7;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #17352d;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: #f7fcfa;
+            border-right: 1px solid #dcebe5;
+            padding: 22px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px 25px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #009b79, #d4bd32);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 13px;
+            border-radius: 25px;
+            color: #17352d;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .nav-item:hover {
+            background: #e5f3ee;
+            color: #008f70;
+        }
+
+        .nav-item.active {
+            background: #009b79;
+            color: white;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: 25px;
+            border-top: 1px solid #dcebe5;
+            padding-top: 18px;
+        }
+
+        .language-links {
+            padding: 0 13px 10px;
+            font-size: 14px;
+        }
+
+        .language-links a {
+            color: #526a62;
+            text-decoration: none;
+        }
+
+        .language-links a:hover {
+            color: #008f70;
+        }
+
+        .signout {
+            display: block;
+            padding: 10px 13px;
+            color: #526a62;
+            text-decoration: none;
+        }
+
+        .signout:hover {
+            color: #c62828;
+        }
+
+        /* MAIN */
+        .main-content {
+            margin-left: 270px;
+            width: calc(100% - 270px);
+            min-height: 100vh;
+        }
+
+        .top-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid #dcebe5;
+            background: #f7fcfa;
+        }
+
+        .page-title {
+            font-size: 31px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: #71847d;
+            margin-top: 5px;
+        }
+
+        .content-area {
+            padding: 30px;
+            max-width: 1200px;
+        }
+
+        /* CARDS */
+        .card-custom {
+            background: white;
+            border: 1px solid #d8e9e2;
+            border-radius: 22px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        /* SUMMARY */
+        .summary-card {
+            background: white;
+            border: 1px solid #d8e9e2;
+            border-radius: 20px;
+            padding: 24px;
+            height: 100%;
+            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
+        }
+
+        .summary-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .summary-label {
+            color: #71847d;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 27px;
+            font-weight: 700;
+            color: #008b6d;
+        }
+
+        /* CHART */
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        /* TABLE */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table thead th {
+            background: #eaf6f1;
+            color: #36574d;
+            border: none;
+            padding: 14px;
+        }
+
+        .table tbody td {
+            padding: 14px;
+            vertical-align: middle;
+            border-color: #e1eee9;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+            background: #e6f5ef;
+            color: #087e65;
+        }
+
+        /* EMPTY */
+        .empty-message {
+            text-align: center;
+            padding: 70px 20px;
+            color: #71847d;
+        }
+
+        .empty-icon {
+            font-size: 55px;
+            margin-bottom: 15px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+            }
+
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .content-area {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <!-- BRAND -->
+        <div class="brand">
+            <div class="brand-icon">♡</div>
+
+            <div class="brand-name">
+                {{ t.brand_name }}
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <nav class="nav-menu">
+
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                {{ t.nav_dashboard }}
+            </a>
+
+            <a href="{{ url_for('home') }}" class="nav-item">
+                <span class="nav-icon">♙</span>
+                {{ t.nav_patient_data }}
+            </a>
+
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌁</span>
+                {{ t.nav_glucose }}
+            </a>
+
+            <a href="{{ url_for('medication') }}" class="nav-item">
+                <span class="nav-icon">◈</span>
+                {{ t.nav_medication }}
+            </a>
+
+            <a href="{{ url_for('appointments') }}" class="nav-item">
+                <span class="nav-icon">□</span>
+                {{ t.nav_appointments }}
+            </a>
+
+            <a href="{{ url_for('doctor_locator') }}" class="nav-item">
+                <span class="nav-icon">⌖</span>
+                {{ t.nav_hospitals }}
+            </a>
+
+            <a href="{{ url_for('progress') }}" class="nav-item active">
+                <span class="nav-icon">⌁</span>
+                {{ t.nav_progress }}
+            </a>
+
+            <a href="{{ url_for('download_report') }}" class="nav-item">
+                <span class="nav-icon">▤</span>
+                {{ t.nav_records }}
+            </a>
+
+            <a href="{{ url_for('bmi_calculator') }}" class="nav-item">
+                <span class="nav-icon">⚖</span>
+                {{ t.nav_bmi }}
+            </a>
+
+            <a href="{{ url_for('monthly_report') }}" class="nav-item">
+                <span class="nav-icon">▧</span>
+                {{ t.nav_monthly_report }}
+            </a>
+
+        </nav>
+
+        <!-- SIDEBAR BOTTOM -->
+        <div class="sidebar-bottom">
+
+            <div class="language-links">
+
+                <a href="{{ url_for('set_language', lang_code='en') }}">
+                    English
+                </a>
+
+                &nbsp;|&nbsp;
+
+                <a href="{{ url_for('set_language', lang_code='hi') }}">
+                    हिन्दी
+                </a>
+
+                &nbsp;|&nbsp;
+
+                <a href="{{ url_for('set_language', lang_code='kn') }}">
+                    ಕನ್ನಡ
+                </a>
+
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="signout">
+                ⇥ &nbsp; {{ t.nav_signout }}
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="top-header">
+
+            <h1 class="page-title">
+                📈 {{ t.progress_title }}
+            </h1>
+
+            <p class="page-subtitle">
+                {{ t.progress_subtitle }}
+            </p>
+
+        </header>
+
+
+        <!-- CONTENT -->
+        <div class="content-area">
+
+            {% if predictions %}
+
+            <!-- SUMMARY CARDS -->
+            <div class="row g-4 mb-4">
+
+                <!-- GLUCOSE -->
+                <div class="col-md-4">
+                    <div class="summary-card">
+
+                        <div class="summary-icon">
+                            🩸
+                        </div>
+
+                        <div class="summary-label">
+                            {{ t.latest_glucose }}
+                        </div>
+
+                        <div class="summary-value">
+
+                            {{ glucose_values[-1] }}
+
+                            <span style="font-size:14px;">
+                                mg/dL
+                            </span>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- BMI -->
+                <div class="col-md-4">
+                    <div class="summary-card">
+
+                        <div class="summary-icon">
+                            ⚖️
+                        </div>
+
+                        <div class="summary-label">
+                            {{ t.latest_bmi }}
+                        </div>
+
+                        <div class="summary-value">
+                            {{ bmi_values[-1] }}
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- RISK -->
+                <div class="col-md-4">
+                    <div class="summary-card">
+
+                        <div class="summary-icon">
+                            ❤️
+                        </div>
+
+                        <div class="summary-label">
+                            {{ t.latest_probability }}
+                        </div>
+
+                        <div class="summary-value">
+                            {{ risk_probabilities[-1] }}%
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- GLUCOSE CHART -->
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    🩸 {{ t.glucose_progress }}
+                </h2>
+
+                <div class="chart-container">
+                    <canvas id="glucoseChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- BMI CHART -->
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    ⚖️ {{ t.bmi_progress }}
+                </h2>
+
+                <div class="chart-container">
+                    <canvas id="bmiChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- RISK CHART -->
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    ❤️ {{ t.risk_progress }}
+                </h2>
+
+                <div class="chart-container">
+                    <canvas id="riskChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- HISTORY TABLE -->
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    📋 {{ t.progress_history }}
+                </h2>
+
+                <div class="table-container">
+
+                    <table class="table">
+
+                        <thead>
+                            <tr>
+
+                                <th>
+                                    {{ t.date }}
+                                </th>
+
+                                <th>
+                                    {{ t.glucose }}
+                                </th>
+
+                                <th>
+                                    {{ t.bmi }}
+                                </th>
+
+                                <th>
+                                    {{ t.risk_probability }}
+                                </th>
+
+                                <th>
+                                    {{ t.risk_level }}
+                                </th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for prediction in predictions %}
+
+                            <tr>
+
+                                <td>
+                                    {{ prediction.date }}
+                                </td>
+
+                                <td>
+                                    {{ prediction.glucose }} mg/dL
+                                </td>
+
+                                <td>
+                                    {{ prediction.bmi }}
+                                </td>
+
+                                <td>
+                                    {{ prediction.probability }}%
+                                </td>
+
+                                <td>
+
+                                    <span class="risk-badge">
+
+                                        {% if prediction.risk_level == "Low" %}
+
+                                            {{ t.risk_low }}
+
+                                        {% elif prediction.risk_level == "Medium" %}
+
+                                            {{ t.risk_medium }}
+
+                                        {% elif prediction.risk_level == "High" %}
+
+                                            {{ t.risk_high }}
+
+                                        {% else %}
+
+                                            {{ prediction.risk_level }}
+
+                                        {% endif %}
+
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            {% else %}
+
+            <!-- EMPTY STATE -->
+            <div class="card-custom">
+
+                <div class="empty-message">
+
+                    <div class="empty-icon">
+                        📊
+                    </div>
+
+                    <h3>
+                        {{ t.no_progress_data }}
+                    </h3>
+
+                    <p>
+                        {{ t.progress_prediction_message }}
+                    </p>
+
+                    <a href="{{ url_for('home') }}"
+                       class="btn btn-success">
+
+                        {{ t.make_prediction }}
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- ================= CHART JAVASCRIPT ================= -->
+
+{% if predictions %}
+
+<script>
+
+    /* DATA FROM FLASK */
+
+    const dates = {{ dates | tojson }};
+    const glucoseValues = {{ glucose_values | tojson }};
+    const bmiValues = {{ bmi_values | tojson }};
+    const riskProbabilities = {{ risk_probabilities | tojson }};
+
+
+    /* ================= GLUCOSE CHART ================= */
+
+    const glucoseCanvas = document.getElementById("glucoseChart");
+
+    if (glucoseCanvas) {
+
+        new Chart(glucoseCanvas, {
+
+            type: "line",
+
+            data: {
+                labels: dates,
+
+                datasets: [{
+                    label: "{{ t.glucose_chart_label }}",
+                    data: glucoseValues,
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 4
+                }]
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: false
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+    /* ================= BMI CHART ================= */
+
+    const bmiCanvas = document.getElementById("bmiChart");
+
+    if (bmiCanvas) {
+
+        new Chart(bmiCanvas, {
+
+            type: "line",
+
+            data: {
+
+                labels: dates,
+
+                datasets: [{
+
+                    label: "{{ t.bmi_chart_label }}",
+
+                    data: bmiValues,
+
+                    borderWidth: 3,
+
+                    tension: 0.3,
+
+                    fill: false,
+
+                    pointRadius: 4
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+                        beginAtZero: false
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+    /* ================= RISK CHART ================= */
+
+    const riskCanvas = document.getElementById("riskChart");
+
+    if (riskCanvas) {
+
+        new Chart(riskCanvas, {
+
+            type: "line",
+
+            data: {
+
+                labels: dates,
+
+                datasets: [{
+
+                    label: "{{ t.risk_chart_label }}",
+
+                    data: riskProbabilities,
+
+                    borderWidth: 3,
+
+                    tension: 0.3,
+
+                    fill: false,
+
+                    pointRadius: 4
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: 100
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+</script>
+
+{% endif %}
+
+</body>
+
+</html>

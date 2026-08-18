@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ t.dashboard_title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>{{ t.dashboard_title }}</h1>
+    <p><a href="/">{{ t.back_to_form }}</a> | <a href="/logout">{{ t.logout }}</a></p>
+
+    {% if predictions|length == 0 %}
+        <p>{{ t.no_predictions }}</p>
+    {% else %}
+        <h2>{{ t.risk_trend }}</h2>
+        <canvas id="riskChart" width="600" height="300"></canvas>
+
+        <h2>{{ t.params_trend }}</h2>
+        <canvas id="paramsChart" width="600" height="300"></canvas>
+
+        <h2>{{ t.prediction_history }}</h2>
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>{{ t.date }}</th>
+                <th>{{ t.glucose }}</th>
+                <th>{{ t.bmi }}</th>
+                <th>{{ t.bloodpressure }}</th>
+                <th>{{ t.risk_level }}</th>
+                <th>{{ t.risk_probability }}</th>
+            </tr>
+            {% for p in predictions %}
+            <tr>
+                <td>{{ table_dates[loop.index0] }}</td>
+                <td>{{ p.glucose|localnum }}</td>
+                <td>{{ p.bmi|localnum }}</td>
+                <td>{{ p.blood_pressure|localnum }}</td>
+                <td>{{ risk_tiers_translated[loop.index0] }}</td>
+                <td>{{ p.probability|localnum }}%</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <script id="chart-data" type="application/json">
+        {
+            "dates": {{ dates|tojson }},
+            "riskProbabilities": {{ risk_probabilities|tojson }},
+            "glucoseValues": {{ glucose_values|tojson }},
+            "bmiValues": {{ bmi_values|tojson }},
+            "riskLabel": {{ t.risk_probability|tojson }},
+            "glucoseLabel": {{ t.glucose|tojson }},
+            "bmiLabel": {{ t.bmi|tojson }}
+        }
+    </script>
+
+    {% if predictions|length > 0 %}
+    <script>
+        const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+
+        new Chart(document.getElementById('riskChart'), {
+            type: 'line',
+            data: {
+                labels: chartData.dates,
+                datasets: [{
+                    label: chartData.riskLabel + ' (%)',
+                    data: chartData.riskProbabilities,
+                    borderColor: 'red',
+                    fill: false
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('paramsChart'), {
+            type: 'line',
+            data: {
+                labels: chartData.dates,
+                datasets: [
+                    {
+                        label: chartData.glucoseLabel,
+                        data: chartData.glucoseValues,
+                        borderColor: 'blue',
+                        fill: false
+                    },
+                    {
+                        label: chartData.bmiLabel,
+                        data: chartData.bmiValues,
+                        borderColor: 'green',
+                        fill: false
+                    }
+                ]
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

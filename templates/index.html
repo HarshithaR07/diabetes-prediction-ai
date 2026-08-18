@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ t.title }}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4faf7;
+            color: #14251f;
+        }
+
+        /* ================= LAYOUT ================= */
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: #f7fcfa;
+            border-right: 1px solid #dcebe5;
+            padding: 22px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px 25px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #009b79, #d4bd32);
+            color: white;
+            font-size: 22px;
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+            color: #14251f;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 13px;
+            border-radius: 25px;
+            color: #17352d;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #e5f3ee;
+            color: #008f70;
+        }
+
+        .nav-item.active {
+            background: #009b79;
+            color: white;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: 25px;
+            border-top: 1px solid #dcebe5;
+            padding-top: 18px;
+        }
+
+        .language-select {
+            width: 100%;
+            border: 1px solid #d6e6e0;
+            border-radius: 25px;
+            background: white;
+            padding: 10px 14px;
+            color: #17352d;
+            margin-bottom: 12px;
+        }
+
+        .signout {
+            display: block;
+            padding: 10px 13px;
+            color: #526a62;
+            text-decoration: none;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main-content {
+            margin-left: 270px;
+            width: calc(100% - 270px);
+            min-height: 100vh;
+        }
+
+        .top-header {
+            height: 92px;
+            padding: 25px 32px;
+            border-bottom: 1px solid #dcebe5;
+            background: #f7fcfa;
+        }
+
+        .page-title {
+            font-size: 31px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: #71847d;
+            margin: 4px 0 0;
+            font-size: 15px;
+        }
+
+        .content-area {
+            padding: 28px 30px 45px;
+        }
+
+        /* ================= CARDS ================= */
+
+        .card-custom {
+            background: white;
+            border: 1px solid #d8e9e2;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
+        }
+
+        .form-card {
+            padding: 24px;
+        }
+
+        .card-heading {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        /* ================= FORM ================= */
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 7px;
+        }
+
+        .form-control {
+            height: 48px;
+            border: 1px solid #d5e6df;
+            border-radius: 25px;
+            background: #fbfefd;
+            padding: 0 16px;
+        }
+
+        .form-control:focus {
+            border-color: #009b79;
+            box-shadow: 0 0 0 3px rgba(0, 155, 121, 0.1);
+        }
+
+        .field-help {
+            color: #8a9994;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* ================= RIGHT INFO ================= */
+
+        .info-card {
+            padding: 28px;
+            min-height: 100%;
+        }
+
+        .risk-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 10px auto 25px;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    white 58%,
+                    transparent 59%
+                ),
+                conic-gradient(
+                    #009b79 0deg,
+                    #009b79 135deg,
+                    #e5f0ec 135deg,
+                    #e5f0ec 360deg
+                );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .risk-number {
+            text-align: center;
+        }
+
+        .risk-number strong {
+            display: block;
+            font-size: 34px;
+        }
+
+        .risk-number span {
+            color: #7c8d87;
+            font-size: 13px;
+        }
+
+        .risk-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .explain-button {
+            display: block;
+            margin: auto;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 22px;
+            color: white;
+            background: linear-gradient(90deg, #009b79, #35ad6d);
+            font-weight: 600;
+        }
+
+        /* ================= FACTORS ================= */
+
+        .factor-card {
+            margin-top: 22px;
+            padding: 24px;
+        }
+
+        .factor {
+            margin-bottom: 18px;
+        }
+
+        .factor-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 7px;
+            font-size: 14px;
+        }
+
+        .factor-bar {
+            height: 8px;
+            background: #e5f0ec;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .factor-progress {
+            height: 100%;
+            width: 60%;
+            background: #009b79;
+            border-radius: 10px;
+        }
+
+        .factor-description {
+            font-size: 12px;
+            color: #80908a;
+            margin-top: 5px;
+        }
+
+        /* ================= BUTTON ================= */
+
+        .predict-button {
+            width: 100%;
+            height: 52px;
+            border: none;
+            border-radius: 28px;
+            margin-top: 10px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #009b79,
+                    #35ad6d,
+                    #d5bc32
+                );
+
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .predict-button:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+            }
+
+            .content-area {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+            }
+
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .top-header {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">♡</div>
+            <div class="brand-name">Diabetes Care</div>
+        </div>
+
+        <nav class="nav-menu">
+
+            <!-- Dashboard -->
+            <a href="{{ url_for('home') }}" class="nav-item active">
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </a>
+
+            <!-- Patient Data -->
+            <a href="{{ url_for('home') }}" class="nav-item">
+                <span class="nav-icon">♙</span>
+                Patient Data
+            </a>
+
+            <!-- Glucose -->
+            <a href="{{ url_for('home') }}" class="nav-item">
+                <span class="nav-icon">⌁</span>
+                Glucose
+            </a>
+
+            <!-- Meals -->
+            <a href="{{ url_for('meal_plan', risk_tier='Low') }}" class="nav-item">
+                <span class="nav-icon">♡</span>
+                Meals & Plan
+            </a>
+
+            <!-- Medication -->
+            <a href="{{ url_for('medication') }}" class="nav-item">
+                <span class="nav-icon">◈</span>
+                Medication
+            </a>
+
+            <!-- Appointments -->
+            <a href="{{ url_for('appointments') }}" class="nav-item">
+                <span class="nav-icon">□</span>
+                Appointments
+            </a>
+
+            <!-- Nearby Hospitals -->
+            <a href="{{ url_for('doctor_locator') }}" class="nav-item">
+                <span class="nav-icon">⌖</span>
+                Nearby Hospitals
+            </a>
+
+            <!-- Exercise -->
+            <a href="{{ url_for('exercise_videos', risk_tier='Low') }}" class="nav-item">
+                <span class="nav-icon">♧</span>
+                Exercise
+            </a>
+
+            <!-- Progress -->
+            <a href="{{ url_for('progress') }}" class="nav-item">
+                <span class="nav-icon">⌁</span>
+                Progress
+            </a>
+
+            <!-- Records -->
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">▤</span>
+                Records
+            </a>
+
+            <!-- BMI Calculator -->
+            <a href="{{ url_for('bmi_calculator') }}" class="nav-item">
+                <span class="nav-icon">⚖</span>
+                BMI Calculator
+            </a>
+
+            <!-- Monthly Report -->
+            <a href="{{ url_for('monthly_report') }}" class="nav-item">
+                <span class="nav-icon">▧</span>
+                Monthly Report
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <select class="language-select"
+                    onchange="changeLanguage(this.value)">
+
+                <option value="en"
+                    {% if current_lang == "en" %}selected{% endif %}>
+                    English
+                </option>
+
+                <option value="hi"
+                    {% if current_lang == "hi" %}selected{% endif %}>
+                    हिन्दी
+                </option>
+
+                <option value="kn"
+                    {% if current_lang == "kn" %}selected{% endif %}>
+                    ಕನ್ನಡ
+                </option>
+
+            </select>
+
+            <a href="{{ url_for('logout') }}" class="signout">
+                ⇥ &nbsp; {{ t.logout }}
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+        <header class="top-header">
+
+            <h1 class="page-title">
+                Patient Data
+            </h1>
+
+            <p class="page-subtitle">
+                Enter your health information to calculate your diabetes risk
+            </p>
+
+        </header>
+
+
+        <div class="content-area">
+
+            <div class="row g-4">
+
+                <!-- ================= FORM ================= -->
+
+                <div class="col-lg-7">
+
+                    <div class="card-custom form-card">
+
+                        <h2 class="card-heading">
+                            Patient information
+                        </h2>
+
+                        <form action="{{ url_for('predict') }}" method="POST">
+
+                            <!-- Pregnancies -->
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    {{ t.pregnancies }}
+                                </label>
+
+                                <input
+                                    type="number"
+                                    name="pregnancies"
+                                    step="1"
+                                    min="0"
+                                    class="form-control"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="row">
+
+                                <!-- Glucose -->
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        {{ t.glucose }}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="glucose"
+                                        step="0.1"
+                                        class="form-control"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- Blood Pressure -->
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        {{ t.bloodpressure }}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="bloodpressure"
+                                        step="0.1"
+                                        class="form-control"
+                                        required
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="row">
+
+                                <!-- Skin Thickness -->
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        {{ t.skinthickness }}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="skinthickness"
+                                        step="0.1"
+                                        class="form-control"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- Insulin -->
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        {{ t.insulin }}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="insulin"
+                                        step="0.1"
+                                        class="form-control"
+                                        required
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="row">
+
+                                <!-- BMI -->
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        {{ t.bmi }}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="bmi"
+                                        step="0.1"
+                                        class="form-control"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- DPF -->
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        {{ t.dpf }}
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="dpf"
+                                        step="0.001"
+                                        class="form-control"
+                                        required
+                                    >
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Age -->
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    {{ t.age }}
+                                </label>
+
+                                <input
+                                    type="number"
+                                    name="age"
+                                    step="1"
+                                    min="1"
+                                    class="form-control"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <button
+                                type="submit"
+                                class="predict-button">
+
+                                {{ t.predict_button }}
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= RIGHT SIDE ================= -->
+
+                <div class="col-lg-5">
+
+                    <div class="card-custom info-card">
+
+                        <h2 class="card-heading">
+                            AI Risk Overview
+                        </h2>
+
+                        <div class="risk-circle">
+
+                            <div class="risk-number">
+
+                                <strong>—</strong>
+
+                                <span>/ 100</span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="risk-title">
+                            Enter your data
+                        </div>
+
+                        <button
+                            class="explain-button"
+                            type="button">
+
+                            ✦ Explain my AI risk factors
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- Factor contribution -->
+
+                    <div class="card-custom factor-card">
+
+                        <h2 class="card-heading">
+                            Factor contribution
+                        </h2>
+
+
+                        <!-- Glucose -->
+
+                        <div class="factor">
+
+                            <div class="factor-header">
+
+                                <span>Glucose</span>
+
+                                <span>Waiting for input</span>
+
+                            </div>
+
+                            <div class="factor-bar">
+
+                                <div
+                                    class="factor-progress"
+                                    style="width: 0%;">
+                                </div>
+
+                            </div>
+
+                            <div class="factor-description">
+
+                                Your glucose value will contribute to the AI risk score.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- BMI -->
+
+                        <div class="factor">
+
+                            <div class="factor-header">
+
+                                <span>BMI</span>
+
+                                <span>Waiting for input</span>
+
+                            </div>
+
+                            <div class="factor-bar">
+
+                                <div
+                                    class="factor-progress"
+                                    style="width: 0%;">
+                                </div>
+
+                            </div>
+
+                            <div class="factor-description">
+
+                                BMI is one of the health factors considered by the model.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Age -->
+
+                        <div class="factor">
+
+                            <div class="factor-header">
+
+                                <span>Age</span>
+
+                                <span>Waiting for input</span>
+
+                            </div>
+
+                            <div class="factor-bar">
+
+                                <div
+                                    class="factor-progress"
+                                    style="width: 0%;">
+                                </div>
+
+                            </div>
+
+                            <div class="factor-description">
+
+                                Age is included in the diabetes risk prediction.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Blood Pressure -->
+
+                        <div class="factor">
+
+                            <div class="factor-header">
+
+                                <span>Blood pressure</span>
+
+                                <span>Waiting for input</span>
+
+                            </div>
+
+                            <div class="factor-bar">
+
+                                <div
+                                    class="factor-progress"
+                                    style="width: 0%;">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- ================= LANGUAGE SCRIPT ================= -->
+
+<script>
+
+function changeLanguage(language) {
+
+    if (language === "en") {
+        window.location.href = "{{ url_for('set_language', lang_code='en') }}";
+    }
+
+    if (language === "hi") {
+        window.location.href = "{{ url_for('set_language', lang_code='hi') }}";
+    }
+
+    if (language === "kn") {
+        window.location.href = "{{ url_for('set_language', lang_code='kn') }}";
+    }
+
+}
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

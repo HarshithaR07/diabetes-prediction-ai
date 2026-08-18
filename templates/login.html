@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Diabetes Care - Login</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Existing project CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Login Page Design -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5fbf8;
+        }
+
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* LEFT SIDE */
+        .login-left {
+            width: 50%;
+            min-height: 100vh;
+            padding: 55px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #009879 0%,
+                    #22a96f 35%,
+                    #78bd58 68%,
+                    #d8bf32 100%
+                );
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+        }
+
+        .brand-name {
+            font-size: 27px;
+            font-weight: 700;
+        }
+
+        .left-content {
+            max-width: 650px;
+        }
+
+        .left-content h1 {
+            font-size: 48px;
+            line-height: 1.18;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .left-content .subtitle {
+            font-size: 19px;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 17px;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon {
+            width: 27px;
+            height: 27px;
+            border: 1.5px solid rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .disclaimer {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* RIGHT SIDE */
+        .login-right {
+            width: 50%;
+            min-height: 100vh;
+            padding: 55px 7%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f7fcfa;
+        }
+
+        .language {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 25px;
+        }
+
+        .language select {
+            border: 1px solid #d7e7e1;
+            border-radius: 25px;
+            padding: 9px 17px;
+            background: white;
+            color: #17352d;
+            outline: none;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 480px;
+            padding: 28px;
+            border: 1px solid #d7e7e1;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 15px 40px rgba(26, 100, 78, 0.08);
+        }
+
+        /* LOGIN / REGISTER TABS */
+        .auth-tabs {
+            display: flex;
+            background: #e7f0ed;
+            border-radius: 30px;
+            padding: 4px;
+            margin-bottom: 28px;
+        }
+
+        .auth-tab {
+            width: 50%;
+            border: none;
+            padding: 11px;
+            border-radius: 25px;
+            background: transparent;
+            color: #49645c;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: #14251f;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .welcome-title {
+            font-size: 30px;
+            font-weight: 700;
+            color: #14251f;
+            margin-bottom: 7px;
+        }
+
+        .welcome-text {
+            color: #71847d;
+            margin-bottom: 28px;
+        }
+
+        .form-label {
+            color: #14251f;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            height: 52px;
+            border-radius: 28px;
+            border: 1px solid #d4e5df;
+            padding: 0 17px;
+            background: #f9fcfb;
+            box-shadow: none !important;
+        }
+
+        .form-control:focus {
+            border-color: #0a9d7b;
+            background: white;
+        }
+
+        .login-button {
+            width: 100%;
+            height: 52px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 28px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #009b79,
+                    #25aa6d,
+                    #d5bc32
+                );
+
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-button:hover {
+            transform: translateY(-1px);
+            opacity: 0.93;
+        }
+
+        .register-text {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 0;
+            color: #6c7e77;
+        }
+
+        .register-text a {
+            color: #009b79;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .register-text a:hover {
+            text-decoration: underline;
+        }
+
+        .privacy-text {
+            margin-top: 20px;
+            text-align: center;
+            color: #73857f;
+            font-size: 13px;
+        }
+
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 900px) {
+            .login-page {
+                flex-direction: column;
+            }
+
+            .login-left {
+                width: 100%;
+                min-height: auto;
+                padding: 35px;
+            }
+
+            .left-content h1 {
+                font-size: 36px;
+            }
+
+            .disclaimer {
+                margin-top: 40px;
+            }
+
+            .login-right {
+                width: 100%;
+                min-height: auto;
+                padding: 35px 20px;
+            }
+
+            .language {
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .login-left {
+                padding: 25px;
+            }
+
+            .left-content h1 {
+                font-size: 31px;
+            }
+
+            .left-content .subtitle {
+                font-size: 16px;
+            }
+
+            .login-card {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-page">
+
+    <!-- ================= LEFT SIDE ================= -->
+    <div class="login-left">
+
+        <div class="brand">
+            <div class="brand-icon">♡</div>
+            <div class="brand-name">Diabetes Care</div>
+        </div>
+
+        <div class="left-content">
+
+            <h1>
+                AI-based risk &<br>
+                personalised lifestyle<br>
+                recommendations for<br>
+                diabetes
+            </h1>
+
+            <p class="subtitle">
+                AI risk scoring & personalised lifestyle care for diabetes
+            </p>
+
+            <div class="feature">
+                <div class="feature-icon">✦</div>
+                <span>Explainable AI risk score from clinical factors</span>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">♡</div>
+                <span>Doctor appointments, medication & glucose tracking</span>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Meal planner, exercise guidance & progress tracking</span>
+            </div>
+
+        </div>
+
+        <div class="disclaimer">
+            Educational support tool — not a replacement for medical advice.
+        </div>
+
+    </div>
+
+
+    <!-- ================= RIGHT SIDE ================= -->
+    <div class="login-right">
+
+        <div class="language">
+            <select>
+                <option>English</option>
+                <option>Kannada</option>
+                <option>Hindi</option>
+            </select>
+        </div>
+
+        <div class="login-card">
+
+            <!-- Login / Register tabs -->
+            <div class="auth-tabs">
+
+                <a href="/login" class="auth-tab active">
+                    Login
+                </a>
+
+                <a href="/signup" class="auth-tab">
+                    Register
+                </a>
+
+            </div>
+
+
+            <h2 class="welcome-title">
+                Welcome back
+            </h2>
+
+            <p class="welcome-text">
+                Sign in to continue to your care dashboard.
+            </p>
+
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger py-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+
+            <!-- Flask Login Form -->
+            <form action="/login" method="POST">
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        name="email"
+                        class="form-control"
+                        placeholder="you@example.com"
+                        required
+                    >
+                </div>
+
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        name="password"
+                        class="form-control"
+                        placeholder="••••••••"
+                        required
+                    >
+                </div>
+
+
+                <button type="submit" class="login-button">
+                    Login
+                </button>
+
+            </form>
+
+
+            <p class="register-text">
+                New here?
+                <a href="/signup">Register</a>
+            </p>
+
+        </div>
+
+        <div class="privacy-text">
+            Your data stays on this device until you export it.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

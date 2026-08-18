@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ t.meal_plan_title.format(risk=risk_tier_display) }}</title>
+</head>
+<body>
+    <h1>{{ t.meal_plan_title.format(risk=risk_tier_display) }}</h1>
+    <p><a href="/">{{ t.back_to_form }}</a> | <a href="/dashboard">{{ t.dashboard_link }}</a> | <a href="/logout">{{ t.logout }}</a></p>
+
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>{{ t.day }}</th>
+            <th>{{ t.breakfast }}</th>
+            <th>{{ t.lunch }}</th>
+            <th>{{ t.dinner }}</th>
+        </tr>
+        {% for day in weekly_plan %}
+        <tr>
+            <td><strong>{{ day.day }}</strong></td>
+            <td>{{ day.breakfast }}</td>
+            <td>{{ day.lunch }}</td>
+            <td>{{ day.dinner }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <a href="/meal-plan/{{ risk_tier }}">{{ t.regenerate_plan }}</a>
+</body>
+</html>

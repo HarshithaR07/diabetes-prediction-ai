@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ t.exercise_videos_title }}</title>
+    <style>
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .video-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .video-card iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+        }
+        .video-card h3 {
+            font-size: 16px;
+            margin: 10px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ t.exercise_videos_title }} ({{ risk_tier_display }})</h1>
+    <p><a href="/">{{ t.back_to_form }}</a> | <a href="/dashboard">{{ t.dashboard_link }}</a> | <a href="/logout">{{ t.logout }}</a></p>
+
+    <div class="video-grid">
+        {% for video in videos %}
+        <div class="video-card">
+            <iframe src="https://www.youtube.com/embed/{{ video.video_id }}" allowfullscreen></iframe>
+            <h3>{{ video.title }}</h3>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

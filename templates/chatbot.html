@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ t.chatbot_title }}</title>
+</head>
+<body>
+    <h1>{{ t.chatbot_title }}</h1>
+    <p><a href="/">{{ t.back_to_form }}</a> | <a href="/dashboard">{{ t.dashboard_link }}</a> | <a href="/logout">{{ t.logout }}</a></p>
+
+    <form action="/chatbot" method="POST">
+        <label>{{ t.chatbot_placeholder }}</label><br>
+        <input type="text" name="message" id="messageInput" style="width:400px;" required>
+        <button type="button" id="micButton" onclick="startListening()">🎤</button>
+        <button type="submit">{{ t.ask_button }}</button>
+    </form>
+
+    <p id="micStatus" style="color: gray;"></p>
+
+    {% if reply %}
+        <br>
+        <p><strong>{{ t.you_asked }}:</strong> {{ user_message }}</p>
+        <p><strong>{{ t.assistant }} ({{ mode }} mode):</strong> {{ reply }}</p>
+    {% endif %}
+
+    <script>
+        function startListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                document.getElementById('micStatus').innerText = "Voice input not supported in this browser. Try Chrome.";
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-IN';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            document.getElementById('micStatus').innerText = "Listening... speak now.";
+
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('messageInput').value = transcript;
+                document.getElementById('micStatus').innerText = "Heard: " + transcript;
+            };
+
+            recognition.onerror = function(event) {
+                document.getElementById('micStatus').innerText = "Error: " + event.error;
+            };
+
+            recognition.onend = function() {
+                if (document.getElementById('micStatus').innerText === "Listening... speak now.") {
+                    document.getElementById('micStatus').innerText = "Didn't catch that, try again.";
+                }
+            };
+        }
+    </script>
+</body>
+</html>

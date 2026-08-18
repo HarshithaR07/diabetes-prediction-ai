@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ t.medication_title }}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4faf7;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #14251f;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: #f7fcfa;
+            border-right: 1px solid #dcebe5;
+            padding: 22px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px 25px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #009b79, #d4bd32);
+            color: white;
+            font-size: 22px;
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 13px;
+            border-radius: 25px;
+            color: #17352d;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #e5f3ee;
+            color: #008f70;
+        }
+
+        .nav-item.active {
+            background: #009b79;
+            color: white;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+        }
+
+        .sidebar-bottom {
+            margin-top: 25px;
+            border-top: 1px solid #dcebe5;
+            padding-top: 18px;
+        }
+
+        .language-select {
+            width: 100%;
+            border: 1px solid #d6e6e0;
+            border-radius: 25px;
+            background: white;
+            padding: 10px 14px;
+            color: #17352d;
+            margin-bottom: 12px;
+        }
+
+        .signout {
+            display: block;
+            padding: 10px 13px;
+            color: #526a62;
+            text-decoration: none;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main-content {
+            margin-left: 270px;
+            width: calc(100% - 270px);
+            min-height: 100vh;
+        }
+
+        .top-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid #dcebe5;
+            background: #f7fcfa;
+        }
+
+        .page-title {
+            font-size: 31px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: #71847d;
+            margin: 5px 0 0;
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        /* ================= CARDS ================= */
+
+        .card-custom {
+            background: white;
+            border: 1px solid #d8e9e2;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .medicine-card {
+            border: 1px solid #dcebe5;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #f8fcfa;
+        }
+
+        .medicine-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #087e65;
+        }
+
+        .medicine-info {
+            color: #61756d;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .time-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #e6f5ef;
+            color: #008b6d;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .warning-box {
+            background: #fff8e6;
+            border: 1px solid #f0dfaa;
+            border-radius: 15px;
+            padding: 18px;
+            color: #705b18;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 11px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            background: linear-gradient(
+                90deg,
+                #009b79,
+                #35ad6d,
+                #d5bc32
+            );
+            font-weight: 600;
+        }
+
+        .back-btn:hover {
+            color: white;
+            opacity: 0.9;
+        }
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .content-area {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">♡</div>
+            <div class="brand-name">
+                {{ t.brand_name }}
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+
+            <a href="/dashboard" class="nav-item">
+                <span class="nav-icon">⌂</span>
+                {{ t.nav_dashboard }}
+            </a>
+
+            <a href="/" class="nav-item">
+                <span class="nav-icon">♙</span>
+                {{ t.nav_patient_data }}
+            </a>
+
+            <a href="/" class="nav-item">
+                <span class="nav-icon">⌁</span>
+                {{ t.nav_glucose }}
+            </a>
+
+            <a href="/meal-plan/{{ risk_tier }}" class="nav-item">
+                <span class="nav-icon">♡</span>
+                {{ t.nav_meals }}
+            </a>
+
+            <a href="/medication" class="nav-item active">
+                <span class="nav-icon">◈</span>
+                {{ t.nav_medication }}
+            </a>
+
+            <a href="/appointments" class="nav-item">
+                <span class="nav-icon">□</span>
+                {{ t.nav_appointments }}
+            </a>
+
+            <a href="/doctor-locator" class="nav-item">
+                <span class="nav-icon">⌖</span>
+                {{ t.nav_hospitals }}
+            </a>
+
+            <a href="/exercise-videos/{{ risk_tier }}" class="nav-item">
+                <span class="nav-icon">♧</span>
+                {{ t.nav_exercise }}
+            </a>
+
+            <a href="/progress" class="nav-item">
+                <span class="nav-icon">⌁</span>
+                {{ t.nav_progress }}
+            </a>
+
+            <a href="/download-report" class="nav-item">
+                <span class="nav-icon">▤</span>
+                {{ t.nav_records }}
+            </a>
+
+            <a href="/bmi-calculator" class="nav-item">
+                <span class="nav-icon">⚖</span>
+                {{ t.nav_bmi }}
+            </a>
+
+            <a href="/monthly-report" class="nav-item">
+                <span class="nav-icon">▧</span>
+                {{ t.nav_monthly_report }}
+            </a>
+
+        </nav>
+
+        <!-- ================= LANGUAGE ================= -->
+
+        <div class="sidebar-bottom">
+
+            <select class="language-select"
+                    onchange="changeLanguage(this.value)">
+
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="kn">ಕನ್ನಡ</option>
+
+            </select>
+
+            <a href="/logout" class="signout">
+                ⇥ &nbsp; {{ t.logout }}
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+        <header class="top-header">
+
+            <h1 class="page-title">
+                💊 {{ t.medication_title }}
+            </h1>
+
+            <p class="page-subtitle">
+                {{ t.medication_subtitle }}
+            </p>
+
+        </header>
+
+
+        <div class="content-area">
+
+            <!-- ================= MEDICATION INFO ================= -->
+
+            <div class="card-custom">
+
+                <h2 class="section-title">
+                    💊 {{ t.medication_management }}
+                </h2>
+
+
+                <div class="medicine-card">
+
+                    <div class="medicine-name">
+                        {{ t.diabetes_medication }}
+                    </div>
+
+                    <div class="medicine-info">
+                        {{ t.diabetes_medication_info }}
+                    </div>
+
+                    <span class="time-badge">
+                        ⏰ {{ t.doctor_schedule }}
+                    </span>
+
+                </div>
+
+
+                <div class="medicine-card">
+
+                    <div class="medicine-name">
+                        {{ t.blood_sugar_monitoring }}
+                    </div>
+
+                    <div class="medicine-info">
+                        {{ t.blood_sugar_monitoring_info }}
+                    </div>
+
+                    <span class="time-badge">
+                        ◉ {{ t.monitoring_advice }}
+                    </span>
+
+                </div>
+
+
+                <div class="medicine-card">
+
+                    <div class="medicine-name">
+                        {{ t.medication_safety }}
+                    </div>
+
+                    <div class="medicine-info">
+                        {{ t.medication_safety_info }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= REMINDER ================= -->
+
+            <div class="card-custom">
+
+                <h2 class="section-title">
+                    ⏰ {{ t.medication_reminder }}
+                </h2>
+
+                <div class="warning-box">
+
+                    <strong>
+                        {{ t.important }}
+                    </strong>
+
+                    <p class="mb-0 mt-2">
+                        {{ t.medication_warning }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= BACK ================= -->
+
+            <div class="card-custom text-center">
+
+                <a href="/dashboard" class="back-btn">
+                    ← {{ t.back_dashboard }}
+                </a>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+function changeLanguage(language) {
+    window.location.href = "/set-language/" + language;
+}
+
+</script>
+
+</body>
+</html>

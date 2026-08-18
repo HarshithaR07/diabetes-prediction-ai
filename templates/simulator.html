@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ t.simulator_title }}</title>
+    <style>
+        .slider-group { margin-bottom: 20px; max-width: 500px; }
+        .slider-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .slider-group input[type=range] { width: 100%; }
+        #resultBox {
+            padding: 15px;
+            border: 2px solid #ccc;
+            max-width: 500px;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ t.simulator_title }}</h1>
+    <p><a href="/">{{ t.back_to_form }}</a> | <a href="/dashboard">{{ t.dashboard_link }}</a> | <a href="/logout">{{ t.logout }}</a></p>
+    <p>{{ t.simulator_intro }}</p>
+
+    <div class="slider-group">
+        <label>{{ t.glucose }}: <span id="glucoseVal">120</span> mg/dL</label>
+        <input type="range" id="glucose" min="50" max="250" value="120" oninput="updateSimulation()">
+    </div>
+
+    <div class="slider-group">
+        <label>{{ t.bmi }}: <span id="bmiVal">28</span></label>
+        <input type="range" id="bmi" min="15" max="50" step="0.1" value="28" oninput="updateSimulation()">
+    </div>
+
+    <div class="slider-group">
+        <label>{{ t.bloodpressure }}: <span id="bpVal">75</span> mmHg</label>
+        <input type="range" id="bloodpressure" min="40" max="130" value="75" oninput="updateSimulation()">
+    </div>
+
+    <div class="slider-group">
+        <label>{{ t.insulin }}: <span id="insulinVal">80</span></label>
+        <input type="range" id="insulin" min="0" max="300" value="80" oninput="updateSimulation()">
+    </div>
+
+    <div class="slider-group">
+        <label>{{ t.age }}: <span id="ageVal">30</span></label>
+        <input type="range" id="age" min="18" max="90" value="30" oninput="updateSimulation()">
+    </div>
+
+    <input type="hidden" id="pregnancies" value="1">
+    <input type="hidden" id="skinthickness" value="20">
+    <input type="hidden" id="dpf" value="0.4">
+
+    <div id="resultBox">
+        <strong>{{ t.risk_level }}:</strong> <span id="riskTierResult">-</span><br>
+        <strong>{{ t.risk_probability }}:</strong> <span id="probabilityResult">-</span>%
+    </div>
+
+    <script id="risk-labels-data" type="application/json">
+        {{ risk_labels|tojson }}
+    </script>
+
+    <script>
+        let debounceTimer;
+        const riskLabels = JSON.parse(document.getElementById('risk-labels-data').textContent);
+        const currentLang = "{{ current_lang if current_lang else 'en' }}";
+
+        function toLocalDigits(num) {
+            const str = String(num);
+            if (currentLang === 'kn') {
+                const kannadaDigits = ['೦','೧','೨','೩','೪','೫','೬','೭','೮','೯'];
+                return str.replace(/[0-9]/g, d => kannadaDigits[d]);
+            } else if (currentLang === 'hi') {
+                const hindiDigits = ['०','१','२','३','४','५','६','७','८','९'];
+                return str.replace(/[0-9]/g, d => hindiDigits[d]);
+            }
+            return str;
+        }
+
+        function updateSimulation() {
+            document.getElementById('glucoseVal').innerText = toLocalDigits(document.getElementById('glucose').value);
+            document.getElementById('bmiVal').innerText = toLocalDigits(document.getElementById('bmi').value);
+            document.getElementById('bpVal').innerText = toLocalDigits(document.getElementById('bloodpressure').value);
+            document.getElementById('insulinVal').innerText = toLocalDigits(document.getElementById('insulin').value);
+            document.getElementById('ageVal').innerText = toLocalDigits(document.getElementById('age').value);
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(fetchPrediction, 300);
+        }
+
+        async function fetchPrediction() {
+            const payload = {
+                pregnancies: document.getElementById('pregnancies').value,
+                glucose: document.getElementById('glucose').value,
+                bloodpressure: document.getElementById('bloodpressure').value,
+                skinthickness: document.getElementById('skinthickness').value,
+                insulin: document.getElementById('insulin').value,
+                bmi: document.getElementById('bmi').value,
+                dpf: document.getElementById('dpf').value,
+                age: document.getElementById('age').value
+            };
+
+            try {
+                const response = await fetch('/api/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+
+                document.getElementById('riskTierResult').innerText = riskLabels[data.risk_tier] || data.risk_tier;
+                document.getElementById('probabilityResult').innerText = toLocalDigits(data.probability);
+
+                const box = document.getElementById('resultBox');
+                if (data.risk_tier === "High") {
+                    box.style.borderColor = "red";
+                } else if (data.risk_tier === "Medium") {
+                    box.style.borderColor = "orange";
+                } else {
+                    box.style.borderColor = "green";
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        updateSimulation();
+    </script>
+</body>
+</html>

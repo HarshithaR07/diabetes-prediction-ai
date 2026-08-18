@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ t.result_title }}</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+
+        body {
+            margin: 0;
+            background: #f4faf7;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #14251f;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: #f7fcfa;
+            border-right: 1px solid #dcebe5;
+            padding: 22px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px 25px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(
+                135deg,
+                #009b79,
+                #d4bd32
+            );
+            color: white;
+            font-size: 22px;
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 13px;
+            border-radius: 25px;
+            color: #17352d;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #e5f3ee;
+            color: #008f70;
+        }
+
+        .nav-item.active {
+            background: #009b79;
+            color: white;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: 25px;
+            border-top: 1px solid #dcebe5;
+            padding-top: 18px;
+        }
+
+        .language-links {
+            margin-bottom: 12px;
+            padding-left: 10px;
+        }
+
+        .language-links a {
+            color: #087e65;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .language-links a:hover {
+            text-decoration: underline;
+        }
+
+        .signout {
+            display: block;
+            padding: 10px 13px;
+            color: #526a62;
+            text-decoration: none;
+        }
+
+        .signout:hover {
+            color: #c62828;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main-content {
+            margin-left: 270px;
+            width: calc(100% - 270px);
+            min-height: 100vh;
+        }
+
+        .top-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid #dcebe5;
+            background: #f7fcfa;
+        }
+
+        .page-title {
+            font-size: 31px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: #71847d;
+            margin: 5px 0 0;
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        /* ================= CARDS ================= */
+
+        .card-custom {
+            background: white;
+            border: 1px solid #d8e9e2;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(
+                30,
+                100,
+                78,
+                0.05
+            );
+        }
+
+        .result-card {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* ================= RISK CIRCLE ================= */
+
+        .risk-circle {
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            margin: 15px auto 20px;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    white 62%,
+                    transparent 63%
+                ),
+
+                conic-gradient(
+                    #009b79 0deg,
+                    #009b79 calc(var(--risk) * 3.6deg),
+                    #e5f0ec calc(var(--risk) * 3.6deg),
+                    #e5f0ec 360deg
+                );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .risk-number strong {
+            display: block;
+            font-size: 43px;
+            font-weight: 700;
+        }
+
+        .risk-number span {
+            color: #7c8d87;
+            font-size: 14px;
+        }
+
+        /* ================= RISK LABEL ================= */
+
+        .risk-label {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .risk-low {
+            background: #e6f5ef;
+            color: #008b6d;
+        }
+
+        .risk-moderate {
+            background: #fff5d6;
+            color: #a87900;
+        }
+
+        .risk-high {
+            background: #fde8e8;
+            color: #c62828;
+        }
+
+        .explanation {
+            color: #71847d;
+            line-height: 1.6;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        /* ================= SHAP ================= */
+
+        .chart-card {
+            padding: 28px;
+        }
+
+        .chart-container {
+            height: 370px;
+            position: relative;
+        }
+
+        /* ================= RECOMMENDATIONS ================= */
+
+        .recommendation-card {
+            padding: 28px;
+            margin-top: 24px;
+        }
+
+        .recommendation-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .recommendation-list li {
+            padding: 15px 18px;
+            margin-bottom: 10px;
+            border-radius: 14px;
+            background: #f3faf7;
+            border: 1px solid #dfede8;
+            color: #40574f;
+        }
+
+        .recommendation-list li::before {
+            content: "✓";
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #dff4ec;
+            color: #008e70;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* ================= ACTIONS ================= */
+
+        .actions-card {
+            padding: 25px;
+            margin-top: 24px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .action-btn {
+            display: block;
+            text-align: center;
+            padding: 13px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            color: #087e65;
+            background: #e8f5f0;
+            border: 1px solid #d2ebe2;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #009b79;
+            color: white;
+        }
+
+        .primary-action {
+            color: white;
+            background: linear-gradient(
+                90deg,
+                #009b79,
+                #35ad6d,
+                #d5bc32
+            );
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+                max-height: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content-area {
+                padding: 18px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="app-layout">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <!-- BRAND -->
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ♡
+            </div>
+
+            <div class="brand-name">
+                Diabetes Care
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NAVIGATION
+        ================================================== -->
+
+        <nav class="nav-menu">
+
+
+            <!-- DASHBOARD -->
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                Dashboard
+
+            </a>
+
+
+            <!-- PATIENT DATA -->
+
+            <a
+                href="{{ url_for('home') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♙
+                </span>
+
+                Patient Data
+
+            </a>
+
+
+            <!-- GLUCOSE -->
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌁
+                </span>
+
+                Glucose
+
+            </a>
+
+
+            <!-- MEALS -->
+
+            <a
+                href="{{ url_for('meal_plan', risk_tier=risk_tier) }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♡
+                </span>
+
+                Meals & Plan
+
+            </a>
+
+
+            <!-- MEDICATION -->
+
+            <a
+                href="{{ url_for('medication') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ◈
+                </span>
+
+                Medication
+
+            </a>
+
+
+            <!-- =================================================
+                 APPOINTMENTS
+            ================================================== -->
+
+            <a
+                href="{{ url_for('appointments') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    □
+                </span>
+
+                Appointments
+
+            </a>
+
+
+            <!-- DOCTOR LOCATOR -->
+
+            <a
+                href="{{ url_for('doctor_locator') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌖
+                </span>
+
+                Nearby Hospitals
+
+            </a>
+
+
+            <!-- EXERCISE -->
+
+            <a
+                href="{{ url_for(
+                    'exercise_videos',
+                    risk_tier=risk_tier
+                ) }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♧
+                </span>
+
+                Exercise
+
+            </a>
+
+
+            <!-- =================================================
+                 PROGRESS
+            ================================================== -->
+
+            <a
+                href="{{ url_for('progress') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌁
+                </span>
+
+                Progress
+
+            </a>
+
+
+            <!-- RECORDS -->
+
+            <a
+                href="{{ url_for('download_report') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                Records
+
+            </a>
+
+
+            <!-- BMI -->
+
+            <a
+                href="{{ url_for('bmi_calculator') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⚖
+                </span>
+
+                BMI Calculator
+
+            </a>
+
+
+            <!-- =================================================
+                 MONTHLY REPORT
+            ================================================== -->
+
+            <a
+                href="{{ url_for('monthly_report') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ▧
+                </span>
+
+                Monthly Report
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- =================================================
+             SIDEBAR BOTTOM
+        ================================================== -->
+
+        <div class="sidebar-bottom">
+
+            <div class="language-links">
+
+                <a
+                    href="{{ url_for(
+                        'set_language',
+                        lang_code='en'
+                    ) }}">
+                    English
+                </a>
+
+                |
+
+                <a
+                    href="{{ url_for(
+                        'set_language',
+                        lang_code='hi'
+                    ) }}">
+                    हिन्दी
+                </a>
+
+                |
+
+                <a
+                    href="{{ url_for(
+                        'set_language',
+                        lang_code='kn'
+                    ) }}">
+                    ಕನ್ನಡ
+                </a>
+
+            </div>
+
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="signout">
+
+                ⇥ &nbsp; Sign out
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- HEADER -->
+
+        <header class="top-header">
+
+            <h1 class="page-title">
+
+                {{ t.result_title }}
+
+            </h1>
+
+            <p class="page-subtitle">
+
+                Your diabetes risk assessment and personalised
+                recommendations
+
+            </p>
+
+        </header>
+
+
+        <!-- =================================================
+             CONTENT AREA
+        ================================================== -->
+
+        <div class="content-area">
+
+
+            <!-- =================================================
+                 RISK RESULT
+            ================================================== -->
+
+            <div class="card-custom result-card">
+
+                <h2 class="card-title">
+                    AI Risk Assessment
+                </h2>
+
+
+                <div
+                    class="risk-circle"
+                    style="--risk: {{ probability }};">
+
+                    <div class="risk-number">
+
+                        <strong>
+                            {{ probability|localnum }}
+                        </strong>
+
+                        <span>
+                            / 100
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RISK LABEL -->
+
+                {% if risk_tier|lower == 'low' %}
+
+                    <div class="risk-label risk-low">
+
+                        🟢 {{ risk_tier_display }}
+
+                    </div>
+
+                {% elif
+                    risk_tier|lower == 'moderate'
+                    or
+                    risk_tier|lower == 'medium'
+                %}
+
+                    <div class="risk-label risk-moderate">
+
+                        🟡 {{ risk_tier_display }}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="risk-label risk-high">
+
+                        🔴 {{ risk_tier_display }}
+
+                    </div>
+
+                {% endif %}
+
+
+                <p class="explanation">
+
+                    {{ t.risk_probability }}:
+
+                    <strong>
+                        {{ probability|localnum }}%
+                    </strong>
+
+                </p>
+
+
+                <p class="explanation">
+
+                    This score is generated using the patient
+                    information provided to the diabetes risk
+                    prediction model.
+
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 SHAP CHART
+            ================================================== -->
+
+            <div class="card-custom chart-card mt-4">
+
+                <h2 class="card-title">
+
+                    {{ t.why_this_score }}
+
+                </h2>
+
+                <p class="page-subtitle mb-4">
+
+                    Understand which health factors contributed
+                    most to your AI risk score.
+
+                </p>
+
+
+                <div class="chart-container">
+
+                    <canvas id="shapChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RECOMMENDATIONS
+            ================================================== -->
+
+            <div class="card-custom recommendation-card">
+
+                <h2 class="card-title">
+
+                    {{ t.recommendations }}
+
+                </h2>
+
+
+                <ul class="recommendation-list">
+
+                    {% for tip in recommendations %}
+
+                    <li>
+                        {{ tip }}
+                    </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </div>
+
+
+            <!-- =================================================
+                 ACTION BUTTONS
+            ================================================== -->
+
+            <div class="card-custom actions-card">
+
+                <h2 class="card-title">
+
+                    Continue your care
+
+                </h2>
+
+
+                <div class="action-grid">
+
+
+                    <!-- MEAL PLAN -->
+
+                    <a
+                        href="{{ url_for(
+                            'meal_plan',
+                            risk_tier=risk_tier
+                        ) }}"
+                        class="action-btn primary-action">
+
+                        🍽 Meal Plan
+
+                    </a>
+
+
+                    <!-- DASHBOARD -->
+
+                    <a
+                        href="{{ url_for('dashboard') }}"
+                        class="action-btn">
+
+                        ◉ Dashboard
+
+                    </a>
+
+
+                    <!-- CHATBOT -->
+
+                    <a
+                        href="{{ url_for('chatbot') }}"
+                        class="action-btn">
+
+                        ✦ AI Chatbot
+
+                    </a>
+
+
+                    <!-- DOWNLOAD REPORT -->
+
+                    <a
+                        href="{{ url_for('download_report') }}"
+                        class="action-btn">
+
+                        ▣ Download Report
+
+                    </a>
+
+
+                    <!-- FIND DOCTOR -->
+
+                    <a
+                        href="{{ url_for('doctor_locator') }}"
+                        class="action-btn">
+
+                        ⌖ Find Doctor
+
+                    </a>
+
+
+                    <!-- RISK SIMULATOR -->
+
+                    <a
+                        href="{{ url_for('simulator') }}"
+                        class="action-btn">
+
+                        ◉ Risk Simulator
+
+                    </a>
+
+
+                    <!-- EXERCISE -->
+
+                    <a
+                        href="{{ url_for(
+                            'exercise_videos',
+                            risk_tier=risk_tier
+                        ) }}"
+                        class="action-btn">
+
+                        ♧ Exercise Videos
+
+                    </a>
+
+
+                    <!-- =================================================
+                         APPOINTMENTS
+                    ================================================== -->
+
+                    <a
+                        href="{{ url_for('appointments') }}"
+                        class="action-btn">
+
+                        📅 Appointments
+
+                    </a>
+
+
+                    <!-- =================================================
+                         PROGRESS
+                    ================================================== -->
+
+                    <a
+                        href="{{ url_for('progress') }}"
+                        class="action-btn">
+
+                        📈 Progress
+
+                    </a>
+
+
+                    <!-- =================================================
+                         MONTHLY REPORT
+                    ================================================== -->
+
+                    <a
+                        href="{{ url_for('monthly_report') }}"
+                        class="action-btn">
+
+                        📊 Monthly Report
+
+                    </a>
+
+
+                    <!-- TRY AGAIN -->
+
+                    <a
+                        href="{{ url_for('home') }}"
+                        class="action-btn">
+
+                        ↻ Try Again
+
+                    </a>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     SHAP DATA
+====================================================== -->
+
+<script id="shap-data" type="application/json">
+
+    {{ shap_contributions|tojson }}
+
+</script>
+
+
+<!-- =====================================================
+     CHART.JS
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+    const shapData = JSON.parse(
+        document
+            .getElementById('shap-data')
+            .textContent
+    );
+
+
+    const labels = shapData.map(
+        item => item.label
+    );
+
+
+    const percents = shapData.map(
+        item => item.percent
+    );
+
+
+    const colors = shapData.map(
+        item =>
+            item.value > 0
+                ? 'rgba(220,53,69,0.70)'
+                : 'rgba(40,167,69,0.70)'
+    );
+
+
+    new Chart(
+        document.getElementById('shapChart'),
+        {
+
+            type: 'bar',
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+
+                    label: '% Contribution to Risk',
+
+                    data: percents,
+
+                    backgroundColor: colors,
+
+                    borderRadius: 8
+
+                }]
+
+            },
+
+            options: {
+
+                indexAxis: 'y',
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        beginAtZero: true,
+
+                        grid: {
+
+                            color: '#e5efeb'
+
+                        }
+
+                    },
+
+                    y: {
+
+                        grid: {
+
+                            display: false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+</script>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('language', 'en') }}">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {{ t.appointments_title if t.appointments_title is defined else "Appointments - Diabetes Care" }}
+    </title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <style>
+
+        body {
+            margin: 0;
+            background: #f4faf7;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #17352d;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: #f7fcfa;
+            border-right: 1px solid #dcebe5;
+            padding: 22px 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px 25px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #009b79, #d4bd32);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 11px 13px;
+            border-radius: 25px;
+            color: #17352d;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #e5f3ee;
+            color: #008f70;
+        }
+
+        .nav-item.active {
+            background: #009b79;
+            color: white;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: 25px;
+            border-top: 1px solid #dcebe5;
+            padding-top: 18px;
+        }
+
+        .language-select {
+            width: 100%;
+            border: 1px solid #d6e6e0;
+            border-radius: 25px;
+            background: white;
+            padding: 10px 14px;
+            color: #17352d;
+            margin-bottom: 12px;
+        }
+
+        .signout {
+            display: block;
+            padding: 10px 13px;
+            color: #526a62;
+            text-decoration: none;
+        }
+
+        .signout:hover {
+            color: #c62828;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main-content {
+            margin-left: 270px;
+            width: calc(100% - 270px);
+            min-height: 100vh;
+        }
+
+        .top-header {
+            padding: 28px 32px;
+            border-bottom: 1px solid #dcebe5;
+            background: #f7fcfa;
+        }
+
+        .page-title {
+            font-size: 31px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: #71847d;
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+
+        .content-area {
+            padding: 30px;
+            max-width: 1100px;
+        }
+
+        /* ================= CARD ================= */
+
+        .card-custom {
+            background: white;
+            border: 1px solid #d8e9e2;
+            border-radius: 22px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 22px;
+        }
+
+        /* ================= FORM ================= */
+
+        .form-label {
+            font-weight: 600;
+            color: #36574d;
+        }
+
+        .form-control,
+        .form-select {
+            border: 1px solid #cfe3db;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #009b79;
+            box-shadow: 0 0 0 3px rgba(0, 155, 121, 0.1);
+        }
+
+        .book-btn {
+            width: 100%;
+            border: none;
+            border-radius: 25px;
+            padding: 13px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(
+                90deg,
+                #009b79,
+                #35ad6d,
+                #d5bc32
+            );
+            cursor: pointer;
+        }
+
+        .book-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* ================= APPOINTMENT ================= */
+
+        .appointment-card {
+            border: 1px solid #dcebe5;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #f8fcfa;
+        }
+
+        .appointment-doctor {
+            font-size: 18px;
+            font-weight: 700;
+            color: #008b6d;
+        }
+
+        .appointment-info {
+            color: #526a62;
+            margin-top: 8px;
+        }
+
+        .cancel-btn {
+            border: none;
+            background: #fde8e8;
+            color: #c62828;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background: #c62828;
+            color: white;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #71847d;
+        }
+
+        /* ================= FLASH ================= */
+
+        .flash-message {
+            background: #e6f5ef;
+            color: #087e65;
+            border: 1px solid #cce9df;
+            border-radius: 12px;
+            padding: 13px 16px;
+            margin-bottom: 20px;
+        }
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+                height: auto;
+            }
+
+            .app-layout {
+                flex-direction: column;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .content-area {
+                padding: 18px;
+            }
+
+            .top-header {
+                padding: 22px 18px;
+            }
+
+            .page-title {
+                font-size: 26px;
+            }
+
+            .card-custom {
+                padding: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app-layout">
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+
+        <!-- BRAND -->
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ♡
+            </div>
+
+            <div class="brand-name">
+                {{ t.brand_name }}
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="nav-menu">
+
+
+            <!-- DASHBOARD -->
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                {{ t.nav_dashboard }}
+
+            </a>
+
+
+            <!-- PATIENT DATA -->
+
+            <a
+                href="{{ url_for('home') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♙
+                </span>
+
+                {{ t.nav_patient_data }}
+
+            </a>
+
+
+            <!-- GLUCOSE -->
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌁
+                </span>
+
+                {{ t.nav_glucose }}
+
+            </a>
+
+
+            <!-- MEALS -->
+
+            <a
+                href="{{ url_for('meal_plan', risk_tier=risk_tier) }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♡
+                </span>
+
+                {{ t.nav_meals }}
+
+            </a>
+
+
+            <!-- MEDICATION -->
+
+            <a
+                href="{{ url_for('medication') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ◈
+                </span>
+
+                {{ t.nav_medication }}
+
+            </a>
+
+
+            <!-- APPOINTMENTS -->
+
+            <a
+                href="{{ url_for('appointments') }}"
+                class="nav-item active">
+
+                <span class="nav-icon">
+                    □
+                </span>
+
+                {{ t.nav_appointments }}
+
+            </a>
+
+
+            <!-- NEARBY HOSPITALS -->
+
+            <a
+                href="{{ url_for('doctor_locator') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌖
+                </span>
+
+                {{ t.nav_hospitals }}
+
+            </a>
+
+
+            <!-- EXERCISE -->
+
+            <a
+                href="{{ url_for('exercise_videos', risk_tier=risk_tier) }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♧
+                </span>
+
+                {{ t.nav_exercise }}
+
+            </a>
+
+
+            <!-- PROGRESS -->
+
+            <a
+                href="{{ url_for('progress') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌁
+                </span>
+
+                {{ t.nav_progress }}
+
+            </a>
+
+
+            <!-- RECORDS -->
+
+            <a
+                href="{{ url_for('download_report') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                {{ t.nav_records }}
+
+            </a>
+
+
+            <!-- BMI -->
+
+            <a
+                href="{{ url_for('bmi_calculator') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⚖
+                </span>
+
+                {{ t.nav_bmi }}
+
+            </a>
+
+
+            <!-- MONTHLY REPORT -->
+
+            <a
+                href="{{ url_for('monthly_report') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ▧
+                </span>
+
+                {{ t.nav_monthly_report }}
+
+            </a>
+
+
+        </nav>
+
+
+        <!-- ================= LANGUAGE ================= -->
+
+        <div class="sidebar-bottom">
+
+
+            <select
+                class="language-select"
+                onchange="changeLanguage(this.value)">
+
+
+                <option
+                    value="en"
+                    {% if session.get('language', 'en') == 'en' %}
+                    selected
+                    {% endif %}>
+
+                    English
+
+                </option>
+
+
+                <option
+                    value="hi"
+                    {% if session.get('language', 'en') == 'hi' %}
+                    selected
+                    {% endif %}>
+
+                    हिन्दी
+
+                </option>
+
+
+                <option
+                    value="kn"
+                    {% if session.get('language', 'en') == 'kn' %}
+                    selected
+                    {% endif %}>
+
+                    ಕನ್ನಡ
+
+                </option>
+
+
+            </select>
+
+
+            <!-- SIGN OUT -->
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="signout">
+
+                ⇥ &nbsp; {{ t.nav_signout }}
+
+            </a>
+
+
+        </div>
+
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- HEADER -->
+
+        <header class="top-header">
+
+
+            <h1 class="page-title">
+
+                📅 {{ t.nav_appointments }}
+
+            </h1>
+
+
+            <p class="page-subtitle">
+
+                {{ t.appointments_subtitle }}
+
+            </p>
+
+
+        </header>
+
+
+        <div class="content-area">
+
+
+            <!-- ================= FLASH MESSAGE ================= -->
+
+            {% with messages = get_flashed_messages() %}
+
+                {% if messages %}
+
+                    {% for message in messages %}
+
+                        <div class="flash-message">
+
+                            ✓ {{ message }}
+
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            {% endwith %}
+
+
+            <!-- ================= BOOK APPOINTMENT ================= -->
+
+            <div class="card-custom">
+
+
+                <h2 class="card-title">
+
+                    {{ t.book_new_appointment }}
+
+                </h2>
+
+
+                <form
+                    action="{{ url_for('appointments') }}"
+                    method="POST">
+
+
+                    <div class="row">
+
+
+                        <!-- DOCTOR -->
+
+                        <div class="col-md-6 mb-3">
+
+
+                            <label
+                                class="form-label"
+                                for="doctor">
+
+                                {{ t.doctor }}
+
+                            </label>
+
+
+                            <select
+                                class="form-select"
+                                id="doctor"
+                                name="doctor"
+                                required>
+
+
+                                <option value="">
+
+                                    {{ t.select_doctor }}
+
+                                </option>
+
+
+                                <option value="Dr. Priya Sharma">
+
+                                    Dr. Priya Sharma - Diabetologist
+
+                                </option>
+
+
+                                <option value="Dr. Rahul Kumar">
+
+                                    Dr. Rahul Kumar - Endocrinologist
+
+                                </option>
+
+
+                                <option value="Dr. Ananya Rao">
+
+                                    Dr. Ananya Rao - General Physician
+
+                                </option>
+
+
+                                <option value="Dr. Sneha Patel">
+
+                                    Dr. Sneha Patel - Diabetes Specialist
+
+                                </option>
+
+
+                            </select>
+
+
+                        </div>
+
+
+                        <!-- DATE -->
+
+                        <div class="col-md-6 mb-3">
+
+
+                            <label
+                                class="form-label"
+                                for="appointment_date">
+
+                                {{ t.appointment_date }}
+
+                            </label>
+
+
+                            <input
+                                type="date"
+                                class="form-control"
+                                id="appointment_date"
+                                name="appointment_date"
+                                required>
+
+
+                        </div>
+
+
+                        <!-- TIME -->
+
+                        <div class="col-md-6 mb-3">
+
+
+                            <label
+                                class="form-label"
+                                for="appointment_time">
+
+                                {{ t.appointment_time }}
+
+                            </label>
+
+
+                            <input
+                                type="time"
+                                class="form-control"
+                                id="appointment_time"
+                                name="appointment_time"
+                                required>
+
+
+                        </div>
+
+
+                        <!-- REASON -->
+
+                        <div class="col-md-6 mb-3">
+
+
+                            <label
+                                class="form-label"
+                                for="reason">
+
+                                {{ t.reason }}
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="reason"
+                                name="reason"
+                                placeholder="{{ t.reason_placeholder }}">
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- BOOK BUTTON -->
+
+                    <div class="mt-3">
+
+
+                        <button
+                            type="submit"
+                            class="book-btn">
+
+                            📅 {{ t.book_now }}
+
+                        </button>
+
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+
+            <!-- ================= MY APPOINTMENTS ================= -->
+
+            <div class="card-custom">
+
+
+                <h2 class="card-title">
+
+                    {{ t.my_appointments }}
+
+                </h2>
+
+
+                {% if appointments %}
+
+
+                    {% for appointment in appointments %}
+
+
+                        <div class="appointment-card">
+
+
+                            <div class="row align-items-center">
+
+
+                                <!-- APPOINTMENT INFORMATION -->
+
+                                <div class="col-md-8">
+
+
+                                    <div class="appointment-doctor">
+
+                                        👨‍⚕️
+                                        {{ appointment.doctor }}
+
+                                    </div>
+
+
+                                    <!-- DATE -->
+
+                                    <div class="appointment-info">
+
+                                        📅
+
+                                        <strong>
+                                            {{ t.date_label }}
+                                        </strong>
+
+                                        {{ appointment.date }}
+
+                                    </div>
+
+
+                                    <!-- TIME -->
+
+                                    <div class="appointment-info">
+
+                                        🕐
+
+                                        <strong>
+                                            {{ t.time_label }}
+                                        </strong>
+
+                                        {{ appointment.time }}
+
+                                    </div>
+
+
+                                    <!-- REASON -->
+
+                                    {% if appointment.reason %}
+
+
+                                        <div class="appointment-info">
+
+                                            📝
+
+                                            <strong>
+                                                {{ t.reason_label }}
+                                            </strong>
+
+                                            {{ appointment.reason }}
+
+                                        </div>
+
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+                                <!-- CANCEL BUTTON -->
+
+                                <div
+                                    class="col-md-4 text-md-end mt-3 mt-md-0">
+
+
+                                    <form
+                                        action="{{ url_for(
+                                            'cancel_appointment',
+                                            index=loop.index0
+                                        ) }}"
+                                        method="POST">
+
+
+                                        <button
+                                            type="submit"
+                                            class="cancel-btn"
+                                            onclick="return confirm('{{ t.confirm_cancel }}');">
+
+                                            {{ t.cancel }}
+
+                                        </button>
+
+
+                                    </form>
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                {% else %}
+
+
+                    <!-- NO APPOINTMENTS -->
+
+                    <div class="empty-message">
+
+
+                        <div style="font-size: 40px;">
+                            📅
+                        </div>
+
+
+                        <p>
+
+                            {{ t.no_appointments }}
+
+                        </p>
+
+
+                        <p>
+
+                            {{ t.book_first_appointment }}
+
+                        </p>
+
+
+                    </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+<!-- ================= LANGUAGE SCRIPT ================= -->
+
+<script>
+
+function changeLanguage(language) {
+
+    window.location.href =
+        "/set-language/" + language;
+
+}
+
+</script>
+
+
+<!-- BOOTSTRAP -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+<!-- ================= DATE/TIME VALIDATION ================= -->
+
+<script>
+
+const dateInput =
+    document.getElementById("appointment_date");
+
+
+if (dateInput) {
+
+    const today =
+        new Date().toISOString().split("T")[0];
+
+    dateInput.min = today;
+
+}
+
+
+const timeInput =
+    document.getElementById("appointment_time");
+
+
+if (timeInput) {
+
+
+    function updateTimeLimit() {
+
+
+        const today =
+            new Date().toISOString().split("T")[0];
+
+
+        if (dateInput.value === today) {
+
+
+            const now = new Date();
+
+
+            let hours =
+                now.getHours()
+                .toString()
+                .padStart(2, "0");
+
+
+            let minutes =
+                now.getMinutes()
+                .toString()
+                .padStart(2, "0");
+
+
+            timeInput.min =
+                hours + ":" + minutes;
+
+
+        } else {
+
+
+            timeInput.removeAttribute("min");
+
+
+        }
+
+    }
+
+
+    dateInput.addEventListener(
+        "change",
+        updateTimeLimit
+    );
+
+
+    updateTimeLimit();
+
+}
+
+</script>
+
+
+</body>
+
+</html>
