@@ -137,7 +137,6 @@
         }
 
         .top-header {
-            height: 92px;
             padding: 25px 32px;
             border-bottom: 1px solid #dcebe5;
             background: #f7fcfa;
@@ -169,7 +168,7 @@
         }
 
         .form-card {
-            padding: 24px;
+            padding: 26px;
         }
 
         .card-heading {
@@ -185,7 +184,8 @@
             margin-bottom: 7px;
         }
 
-        .form-control {
+        .form-control,
+        .form-select {
             height: 48px;
             border: 1px solid #d5e6df;
             border-radius: 25px;
@@ -193,7 +193,8 @@
             padding: 0 16px;
         }
 
-        .form-control:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: #009b79;
             box-shadow: 0 0 0 3px rgba(0, 155, 121, 0.1);
         }
@@ -204,12 +205,34 @@
             margin-top: 5px;
         }
 
-        /* ================= RIGHT INFO ================= */
+        /* ================= INFO ================= */
 
         .info-card {
             padding: 28px;
-            min-height: 100%;
         }
+
+        .info-box {
+            background: #f4faf7;
+            border: 1px solid #dcebe5;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        .info-box h5 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            font-size: 13px;
+            color: #71847d;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* ================= RISK CIRCLE ================= */
 
         .risk-circle {
             width: 150px;
@@ -225,8 +248,8 @@
                 ),
                 conic-gradient(
                     #009b79 0deg,
-                    #009b79 135deg,
-                    #e5f0ec 135deg,
+                    #009b79 0deg,
+                    #e5f0ec 0deg,
                     #e5f0ec 360deg
                 );
 
@@ -256,55 +279,6 @@
             margin-bottom: 20px;
         }
 
-        .explain-button {
-            display: block;
-            margin: auto;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 22px;
-            color: white;
-            background: linear-gradient(90deg, #009b79, #35ad6d);
-            font-weight: 600;
-        }
-
-        /* ================= FACTORS ================= */
-
-        .factor-card {
-            margin-top: 22px;
-            padding: 24px;
-        }
-
-        .factor {
-            margin-bottom: 18px;
-        }
-
-        .factor-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 7px;
-            font-size: 14px;
-        }
-
-        .factor-bar {
-            height: 8px;
-            background: #e5f0ec;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .factor-progress {
-            height: 100%;
-            width: 60%;
-            background: #009b79;
-            border-radius: 10px;
-        }
-
-        .factor-description {
-            font-size: 12px;
-            color: #80908a;
-            margin-top: 5px;
-        }
-
         /* ================= BUTTON ================= */
 
         .predict-button {
@@ -325,11 +299,22 @@
             color: white;
             font-size: 16px;
             font-weight: 600;
+            cursor: pointer;
         }
 
         .predict-button:hover {
             opacity: 0.92;
             transform: translateY(-1px);
+        }
+
+        /* ================= SECTION ================= */
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 24px;
+            margin-bottom: 15px;
+            color: #17352d;
         }
 
         /* ================= MOBILE ================= */
@@ -390,73 +375,85 @@
         <nav class="nav-menu">
 
             <!-- Dashboard -->
-            <a href="{{ url_for('home') }}" class="nav-item active">
+            <a href="{{ url_for('home') }}"
+               class="nav-item active">
                 <span class="nav-icon">⌂</span>
                 Dashboard
             </a>
 
             <!-- Patient Data -->
-            <a href="{{ url_for('home') }}" class="nav-item">
+            <a href="{{ url_for('home') }}"
+               class="nav-item">
                 <span class="nav-icon">♙</span>
                 Patient Data
             </a>
 
             <!-- Glucose -->
-            <a href="{{ url_for('home') }}" class="nav-item">
+            <a href="{{ url_for('home') }}"
+               class="nav-item">
                 <span class="nav-icon">⌁</span>
                 Glucose
             </a>
 
             <!-- Meals -->
-            <a href="{{ url_for('meal_plan', risk_tier='Low') }}" class="nav-item">
+            <a href="{{ url_for('meal_plan', risk_tier='Low') }}"
+               class="nav-item">
                 <span class="nav-icon">♡</span>
                 Meals & Plan
             </a>
 
             <!-- Medication -->
-            <a href="{{ url_for('medication') }}" class="nav-item">
+            <a href="{{ url_for('medication') }}"
+               class="nav-item">
                 <span class="nav-icon">◈</span>
                 Medication
             </a>
 
             <!-- Appointments -->
-            <a href="{{ url_for('appointments') }}" class="nav-item">
+            <a href="{{ url_for('appointments') }}"
+               class="nav-item">
                 <span class="nav-icon">□</span>
                 Appointments
             </a>
 
             <!-- Nearby Hospitals -->
-            <a href="{{ url_for('doctor_locator') }}" class="nav-item">
+            <a href="{{ url_for('doctor_locator') }}"
+               class="nav-item">
                 <span class="nav-icon">⌖</span>
                 Nearby Hospitals
             </a>
 
             <!-- Exercise -->
-            <a href="{{ url_for('exercise_videos', risk_tier='Low') }}" class="nav-item">
+            <a href="{{ url_for('exercise_videos', risk_tier='Low') }}"
+               class="nav-item">
                 <span class="nav-icon">♧</span>
                 Exercise
             </a>
 
             <!-- Progress -->
-            <a href="{{ url_for('progress') }}" class="nav-item">
+            <a href="{{ url_for('progress') }}"
+               class="nav-item">
                 <span class="nav-icon">⌁</span>
                 Progress
             </a>
 
             <!-- Records -->
-            <a href="{{ url_for('dashboard') }}" class="nav-item">
+            <a href="{{ url_for('dashboard') }}"
+               class="nav-item">
                 <span class="nav-icon">▤</span>
                 Records
             </a>
 
             <!-- BMI Calculator -->
-            <a href="{{ url_for('bmi_calculator') }}" class="nav-item">
+            <a href="{{ url_for('bmi_calculator') }}"
+               class="nav-item">
                 <span class="nav-icon">⚖</span>
                 BMI Calculator
             </a>
 
             <!-- Monthly Report -->
-            <a href="{{ url_for('monthly_report') }}" class="nav-item">
+            <a href="{{ url_for('monthly_report') }}"
+               class="nav-item">
                 <span class="nav-icon">▧</span>
                 Monthly Report
             </a>
@@ -485,7 +482,8 @@
 
             </select>
 
-            <a href="{{ url_for('logout') }}" class="signout">
+            <a href="{{ url_for('logout') }}"
+               class="signout">
                 ⇥ &nbsp; {{ t.logout }}
             </a>
 
@@ -505,7 +503,7 @@
             </h1>
 
             <p class="page-subtitle">
-                Enter your health information to calculate your diabetes risk
+                Enter your health information to calculate your AI diabetes risk
             </p>
 
         </header>
@@ -522,174 +520,323 @@
                     <div class="card-custom form-card">
 
                         <h2 class="card-heading">
-                            Patient information
+                            Patient Information
                         </h2>
 
-                        <form action="{{ url_for('predict') }}" method="POST">
+                        <form action="{{ url_for('predict') }}"
+                              method="POST">
 
-                            <!-- Pregnancies -->
+                            <!-- YEAR -->
+
                             <div class="mb-3">
 
                                 <label class="form-label">
-                                    {{ t.pregnancies }}
+                                    Year
                                 </label>
 
                                 <input
                                     type="number"
-                                    name="pregnancies"
-                                    step="1"
-                                    min="0"
+                                    name="year"
+                                    value="2026"
+                                    min="2000"
+                                    max="2030"
                                     class="form-control"
                                     required
                                 >
 
-                            </div>
-
-
-                            <div class="row">
-
-                                <!-- Glucose -->
-                                <div class="col-md-6 mb-3">
-
-                                    <label class="form-label">
-                                        {{ t.glucose }}
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        name="glucose"
-                                        step="0.1"
-                                        class="form-control"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <!-- Blood Pressure -->
-                                <div class="col-md-6 mb-3">
-
-                                    <label class="form-label">
-                                        {{ t.bloodpressure }}
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        name="bloodpressure"
-                                        step="0.1"
-                                        class="form-control"
-                                        required
-                                    >
-
+                                <div class="field-help">
+                                    Enter the year of the health assessment.
                                 </div>
 
                             </div>
 
 
-                            <div class="row">
+                            <!-- GENDER -->
 
-                                <!-- Skin Thickness -->
-                                <div class="col-md-6 mb-3">
-
-                                    <label class="form-label">
-                                        {{ t.skinthickness }}
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        name="skinthickness"
-                                        step="0.1"
-                                        class="form-control"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <!-- Insulin -->
-                                <div class="col-md-6 mb-3">
-
-                                    <label class="form-label">
-                                        {{ t.insulin }}
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        name="insulin"
-                                        step="0.1"
-                                        class="form-control"
-                                        required
-                                    >
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="row">
-
-                                <!-- BMI -->
-                                <div class="col-md-6 mb-3">
-
-                                    <label class="form-label">
-                                        {{ t.bmi }}
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        name="bmi"
-                                        step="0.1"
-                                        class="form-control"
-                                        required
-                                    >
-
-                                </div>
-
-
-                                <!-- DPF -->
-                                <div class="col-md-6 mb-3">
-
-                                    <label class="form-label">
-                                        {{ t.dpf }}
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        name="dpf"
-                                        step="0.001"
-                                        class="form-control"
-                                        required
-                                    >
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- Age -->
                             <div class="mb-3">
 
                                 <label class="form-label">
-                                    {{ t.age }}
+                                    Gender
+                                </label>
+
+                                <select
+                                    name="gender"
+                                    class="form-select"
+                                    required>
+
+                                    <option value="">
+                                        Select gender
+                                    </option>
+
+                                    <option value="Female">
+                                        Female
+                                    </option>
+
+                                    <option value="Male">
+                                        Male
+                                    </option>
+
+                                    <option value="Other">
+                                        Other
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="row">
+
+                                <!-- AGE -->
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Age
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        name="age"
+                                        min="1"
+                                        max="120"
+                                        step="1"
+                                        class="form-control"
+                                        placeholder="e.g. 35"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- LOCATION -->
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Location
+                                    </label>
+
+                                    <select
+                                        name="location"
+                                        class="form-select"
+                                        required>
+
+                                        <option value="">
+                                            Select location
+                                        </option>
+
+                                        <option value="Urban">
+                                            Urban
+                                        </option>
+
+                                        <option value="Rural">
+                                            Rural
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- HYPERTENSION -->
+
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Hypertension
+                                    </label>
+
+                                    <select
+                                        name="hypertension"
+                                        class="form-select"
+                                        required>
+
+                                        <option value="">
+                                            Select
+                                        </option>
+
+                                        <option value="0">
+                                            No
+                                        </option>
+
+                                        <option value="1">
+                                            Yes
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- HEART DISEASE -->
+
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        Heart Disease
+                                    </label>
+
+                                    <select
+                                        name="heart_disease"
+                                        class="form-select"
+                                        required>
+
+                                        <option value="">
+                                            Select
+                                        </option>
+
+                                        <option value="0">
+                                            No
+                                        </option>
+
+                                        <option value="1">
+                                            Yes
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- SMOKING HISTORY -->
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Smoking History
+                                </label>
+
+                                <select
+                                    name="smoking_history"
+                                    class="form-select"
+                                    required>
+
+                                    <option value="">
+                                        Select smoking history
+                                    </option>
+
+                                    <option value="never">
+                                        Never
+                                    </option>
+
+                                    <option value="No Info">
+                                        No Info
+                                    </option>
+
+                                    <option value="current">
+                                        Current
+                                    </option>
+
+                                    <option value="former">
+                                        Former
+                                    </option>
+
+                                    <option value="ever">
+                                        Ever
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- ================= HEALTH MEASUREMENTS ================= -->
+
+                            <div class="section-title">
+                                Health Measurements
+                            </div>
+
+
+                            <!-- BMI -->
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    BMI
                                 </label>
 
                                 <input
                                     type="number"
-                                    name="age"
-                                    step="1"
-                                    min="1"
+                                    name="bmi"
+                                    step="0.1"
+                                    min="5"
+                                    max="80"
                                     class="form-control"
+                                    placeholder="e.g. 25.5"
                                     required
                                 >
 
+                                <div class="field-help">
+                                    Body Mass Index based on your height and weight.
+                                </div>
+
+                            </div>
+                            <!-- HbA1c -->
+
+<div class="mb-3">
+
+    <label class="form-label">
+        HbA1c Level
+    </label>
+
+    <input
+        type="number"
+        name="hbA1c_level"
+        step="0.1"
+        min="3"
+        max="20"
+        class="form-control"
+        placeholder="e.g. 5.5"
+        required
+    >
+
+    <div class="field-help">
+        HbA1c shows your average blood glucose level over the past 2–3 months.
+    </div>
+
+</div>
+
+
+                            <!-- BLOOD GLUCOSE -->
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Blood Glucose Level
+                                </label>
+
+                                <input
+                                    type="number"
+                                    name="blood_glucose_level"
+                                    step="1"
+                                    min="40"
+                                    max="500"
+                                    class="form-control"
+                                    placeholder="e.g. 120"
+                                    required
+                                >
+
+                                <div class="field-help">
+                                    Enter the measured blood glucose level.
+                                </div>
+
                             </div>
 
+
+                            <!-- SUBMIT -->
 
                             <button
                                 type="submit"
                                 class="predict-button">
 
-                                {{ t.predict_button }}
+                                ✦ Calculate AI Diabetes Risk
 
                             </button>
 
@@ -723,139 +870,131 @@
                         </div>
 
                         <div class="risk-title">
-                            Enter your data
+                            Enter your health data
                         </div>
 
-                        <button
-                            class="explain-button"
-                            type="button">
 
-                            ✦ Explain my AI risk factors
+                        <!-- AI INFORMATION -->
 
-                        </button>
+                        <div class="info-box">
+
+                            <h5>
+                                🤖 AI-powered prediction
+                            </h5>
+
+                            <p>
+                                The system analyzes your health information
+                                using a machine learning model trained on
+                                100,000 patient records.
+                            </p>
+
+                        </div>
+
+
+                        <!-- HEALTH FACTORS -->
+
+                        <div class="info-box">
+
+                            <h5>
+                                📊 Health factors
+                            </h5>
+
+                            <p>
+                                The prediction considers age, BMI, blood
+                                glucose, hypertension, heart disease,
+                                smoking history and other patient information.
+                            </p>
+
+                        </div>
+
+
+                        <!-- IMPORTANT -->
+
+                        <div class="info-box">
+
+                            <h5>
+                                ⚕️ Important
+                            </h5>
+
+                            <p>
+                                This result is an AI-based risk estimate and
+                                should not replace professional medical advice.
+                            </p>
+
+                        </div>
 
                     </div>
 
 
-                    <!-- Factor contribution -->
+                    <!-- ================= MAIN RISK FACTORS ================= -->
 
-                    <div class="card-custom factor-card">
+                    <div class="card-custom info-card mt-4">
 
                         <h2 class="card-heading">
-                            Factor contribution
+                            Main Risk Factors
                         </h2>
 
 
-                        <!-- Glucose -->
+                        <!-- BLOOD GLUCOSE -->
 
-                        <div class="factor">
+                        <div class="info-box">
 
-                            <div class="factor-header">
+                            <h5>
+                                🩸 Blood Glucose
+                            </h5>
 
-                                <span>Glucose</span>
-
-                                <span>Waiting for input</span>
-
-                            </div>
-
-                            <div class="factor-bar">
-
-                                <div
-                                    class="factor-progress"
-                                    style="width: 0%;">
-                                </div>
-
-                            </div>
-
-                            <div class="factor-description">
-
-                                Your glucose value will contribute to the AI risk score.
-
-                            </div>
+                            <p>
+                                Higher blood glucose levels can increase
+                                diabetes risk.
+                            </p>
 
                         </div>
 
 
                         <!-- BMI -->
 
-                        <div class="factor">
+                        <div class="info-box">
 
-                            <div class="factor-header">
+                            <h5>
+                                ⚖️ BMI
+                            </h5>
 
-                                <span>BMI</span>
-
-                                <span>Waiting for input</span>
-
-                            </div>
-
-                            <div class="factor-bar">
-
-                                <div
-                                    class="factor-progress"
-                                    style="width: 0%;">
-                                </div>
-
-                            </div>
-
-                            <div class="factor-description">
-
-                                BMI is one of the health factors considered by the model.
-
-                            </div>
+                            <p>
+                                BMI is considered as one of the health
+                                characteristics used by the model.
+                            </p>
 
                         </div>
 
 
-                        <!-- Age -->
+                        <!-- AGE -->
 
-                        <div class="factor">
+                        <div class="info-box">
 
-                            <div class="factor-header">
+                            <h5>
+                                👤 Age
+                            </h5>
 
-                                <span>Age</span>
-
-                                <span>Waiting for input</span>
-
-                            </div>
-
-                            <div class="factor-bar">
-
-                                <div
-                                    class="factor-progress"
-                                    style="width: 0%;">
-                                </div>
-
-                            </div>
-
-                            <div class="factor-description">
-
-                                Age is included in the diabetes risk prediction.
-
-                            </div>
+                            <p>
+                                Age is included as one of the prediction
+                                features.
+                            </p>
 
                         </div>
 
 
-                        <!-- Blood Pressure -->
+                        <!-- HYPERTENSION -->
 
-                        <div class="factor">
+                        <div class="info-box">
 
-                            <div class="factor-header">
+                            <h5>
+                                ❤️ Hypertension
+                            </h5>
 
-                                <span>Blood pressure</span>
-
-                                <span>Waiting for input</span>
-
-                            </div>
-
-                            <div class="factor-bar">
-
-                                <div
-                                    class="factor-progress"
-                                    style="width: 0%;">
-                                </div>
-
-                            </div>
+                            <p>
+                                High blood pressure is considered as an
+                                important health factor in diabetes risk.
+                            </p>
 
                         </div>
 
@@ -879,15 +1018,18 @@
 function changeLanguage(language) {
 
     if (language === "en") {
-        window.location.href = "{{ url_for('set_language', lang_code='en') }}";
+        window.location.href =
+            "{{ url_for('set_language', lang_code='en') }}";
     }
 
     if (language === "hi") {
-        window.location.href = "{{ url_for('set_language', lang_code='hi') }}";
+        window.location.href =
+            "{{ url_for('set_language', lang_code='hi') }}";
     }
 
     if (language === "kn") {
-        window.location.href = "{{ url_for('set_language', lang_code='kn') }}";
+        window.location.href =
+            "{{ url_for('set_language', lang_code='kn') }}";
     }
 
 }

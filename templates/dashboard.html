@@ -1,95 +1,1718 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>{{ t.dashboard_title }}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <h1>{{ t.dashboard_title }}</h1>
-    <p><a href="/">{{ t.back_to_form }}</a> | <a href="/logout">{{ t.logout }}</a></p>
 
-    {% if predictions|length == 0 %}
-        <p>{{ t.no_predictions }}</p>
-    {% else %}
-        <h2>{{ t.risk_trend }}</h2>
-        <canvas id="riskChart" width="600" height="300"></canvas>
+    <meta charset="UTF-8">
 
-        <h2>{{ t.params_trend }}</h2>
-        <canvas id="paramsChart" width="600" height="300"></canvas>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-        <h2>{{ t.prediction_history }}</h2>
-        <table border="1" cellpadding="8">
-            <tr>
-                <th>{{ t.date }}</th>
-                <th>{{ t.glucose }}</th>
-                <th>{{ t.bmi }}</th>
-                <th>{{ t.bloodpressure }}</th>
-                <th>{{ t.risk_level }}</th>
-                <th>{{ t.risk_probability }}</th>
-            </tr>
-            {% for p in predictions %}
-            <tr>
-                <td>{{ table_dates[loop.index0] }}</td>
-                <td>{{ p.glucose|localnum }}</td>
-                <td>{{ p.bmi|localnum }}</td>
-                <td>{{ p.blood_pressure|localnum }}</td>
-                <td>{{ risk_tiers_translated[loop.index0] }}</td>
-                <td>{{ p.probability|localnum }}%</td>
-            </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
+    <title>
+        {{ t.dashboard_title|default("Dashboard") }}
+    </title>
 
-    <script id="chart-data" type="application/json">
-        {
-            "dates": {{ dates|tojson }},
-            "riskProbabilities": {{ risk_probabilities|tojson }},
-            "glucoseValues": {{ glucose_values|tojson }},
-            "bmiValues": {{ bmi_values|tojson }},
-            "riskLabel": {{ t.risk_probability|tojson }},
-            "glucoseLabel": {{ t.glucose|tojson }},
-            "bmiLabel": {{ t.bmi|tojson }}
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
         }
-    </script>
 
-    {% if predictions|length > 0 %}
-    <script>
-        const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+        body {
+            margin: 0;
+            background: #f5f9f7;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #20352d;
+        }
 
-        new Chart(document.getElementById('riskChart'), {
-            type: 'line',
-            data: {
-                labels: chartData.dates,
-                datasets: [{
-                    label: chartData.riskLabel + ' (%)',
-                    data: chartData.riskProbabilities,
-                    borderColor: 'red',
-                    fill: false
-                }]
+        /* ==============================
+           SIDEBAR
+        ============================== */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid #e5eee9;
+            padding: 25px 16px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px 28px;
+        }
+
+        .brand-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 13px;
+            background: #1f9d68;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 23px;
+        }
+
+        .brand h4 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 700;
+            color: #1d3c30;
+        }
+
+        .brand small {
+            color: #8a9c94;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #9aa9a3;
+            margin: 15px 12px 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-link {
+            color: #60746b;
+            padding: 12px 14px;
+            margin: 4px 0;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .nav-link i {
+            font-size: 17px;
+        }
+
+        .nav-link:hover {
+            background: #eef9f4;
+            color: #168557;
+        }
+
+        .nav-link.active {
+            background: #e8f7f0;
+            color: #138456;
+            font-weight: 600;
+        }
+
+        /* ==============================
+           MAIN
+        ============================== */
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 75px;
+            background: white;
+            border-bottom: 1px solid #e8efeb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 35px;
+        }
+
+        .topbar h5 {
+            margin: 0;
+            font-weight: 700;
+            color: #263f35;
+        }
+
+        .topbar p {
+            margin: 3px 0 0;
+            color: #8b9a94;
+            font-size: 13px;
+        }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dff4ea;
+            color: #168557;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .logout {
+            color: #d35d5d;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        /* ==============================
+           CONTENT
+        ============================== */
+
+        .content {
+            padding: 30px 35px 50px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            font-size: 27px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .welcome p {
+            color: #7d9087;
+            margin: 0;
+        }
+
+        /* ==============================
+           STAT CARDS
+        ============================== */
+
+        .stat-card {
+            background: white;
+            border-radius: 17px;
+            padding: 21px;
+            border: 1px solid #e7efeb;
+            height: 100%;
+            box-shadow: 0 3px 15px rgba(32, 70, 54, 0.04);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e9f7f1;
+            color: #159061;
+            font-size: 19px;
+        }
+
+        .stat-label {
+            color: #84958e;
+            font-size: 13px;
+            margin-top: 14px;
+        }
+
+        .stat-value {
+            font-size: 25px;
+            font-weight: 700;
+            margin-top: 3px;
+            color: #263e35;
+        }
+
+        .stat-unit {
+            font-size: 12px;
+            color: #8b9a94;
+            font-weight: normal;
+        }
+
+        /* ==============================
+           CARDS
+        ============================== */
+
+        .card-box {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e6eee9;
+            padding: 23px;
+            height: 100%;
+            box-shadow: 0 3px 15px rgba(32, 70, 54, 0.04);
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #29463b;
+            margin-bottom: 20px;
+        }
+
+        /* ==============================
+           RISK CARD
+        ============================== */
+
+        .risk-card {
+            text-align: center;
+        }
+
+        .risk-circle {
+            width: 170px;
+            height: 170px;
+            margin: 10px auto 20px;
+            border-radius: 50%;
+            background:
+                conic-gradient(
+                    #1fa36d var(--risk-angle),
+                    #e8f0ec var(--risk-angle)
+                );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .risk-circle::after {
+            content: "";
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .risk-number {
+            position: relative;
+            z-index: 2;
+        }
+
+        .risk-number strong {
+            display: block;
+            font-size: 37px;
+            color: #234438;
+        }
+
+        .risk-number span {
+            color: #94a39d;
+            font-size: 12px;
+        }
+
+        .risk-level {
+            display: inline-block;
+            padding: 7px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .risk-low {
+            color: #168657;
+            background: #e4f7ee;
+        }
+
+        .risk-medium {
+            color: #c47b14;
+            background: #fff3dd;
+        }
+
+        .risk-high {
+            color: #d04e4e;
+            background: #ffe7e7;
+        }
+
+        .risk-description {
+            color: #71837b;
+            font-size: 13px;
+            line-height: 1.7;
+            margin-top: 15px;
+        }
+
+        /* ==============================
+           HEALTH VALUES
+        ============================== */
+
+        .health-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #edf2ef;
+        }
+
+        .health-item:last-child {
+            border-bottom: none;
+        }
+
+        .health-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .health-icon {
+            width: 38px;
+            height: 38px;
+            background: #eef8f4;
+            color: #188a60;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .health-name {
+            font-size: 13px;
+            color: #657970;
+        }
+
+        .health-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #29443a;
+        }
+
+        /* ==============================
+           QUICK ACTIONS
+        ============================== */
+
+        .quick-action {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            background: #f8fbfa;
+            border: 1px solid #e8efec;
+            border-radius: 13px;
+            padding: 16px;
+            transition: 0.2s;
+            height: 100%;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-2px);
+            border-color: #b8ddcc;
+            background: #f1faf6;
+        }
+
+        .quick-action i {
+            font-size: 21px;
+            color: #17895e;
+        }
+
+        .quick-action strong {
+            display: block;
+            font-size: 13px;
+            margin-top: 9px;
+        }
+
+        .quick-action span {
+            display: block;
+            color: #87978f;
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        /* ==============================
+           TABLE
+        ============================== */
+
+        .table-card {
+            margin-top: 25px;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            color: #7d8e87;
+            font-size: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid #e8efeb;
+            padding: 13px;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            padding: 14px 13px;
+            font-size: 13px;
+            color: #53675f;
+            vertical-align: middle;
+        }
+
+        .badge-low {
+            background: #e3f7ed;
+            color: #158457;
+        }
+
+        .badge-medium {
+            background: #fff1d8;
+            color: #b87917;
+        }
+
+        .badge-high {
+            background: #ffe5e5;
+            color: #ca4c4c;
+        }
+
+        .risk-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ==============================
+           EMPTY STATE
+        ============================== */
+
+        .empty-state {
+            text-align: center;
+            padding: 35px 15px;
+            color: #87978f;
+        }
+
+        .empty-state i {
+            font-size: 38px;
+            color: #b5c8bf;
+            margin-bottom: 10px;
+        }
+
+        .primary-btn {
+            background: #188e61;
+            border: none;
+            color: white;
+            border-radius: 9px;
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 13px;
+        }
+
+        .primary-btn:hover {
+            background: #147950;
+            color: white;
+        }
+
+        /* ==============================
+           RESPONSIVE
+        ============================== */
+
+        @media (max-width: 991px) {
+
+            .sidebar {
+                width: 210px;
             }
-        });
 
-        new Chart(document.getElementById('paramsChart'), {
-            type: 'line',
-            data: {
-                labels: chartData.dates,
-                datasets: [
-                    {
-                        label: chartData.glucoseLabel,
-                        data: chartData.glucoseValues,
-                        borderColor: 'blue',
-                        fill: false
-                    },
-                    {
-                        label: chartData.bmiLabel,
-                        data: chartData.bmiValues,
-                        borderColor: 'green',
-                        fill: false
-                    }
-                ]
+            .main {
+                margin-left: 210px;
             }
-        });
-    </script>
-    {% endif %}
+
+            .content {
+                padding: 25px 20px;
+            }
+
+        }
+
+        @media (max-width: 768px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e5eee9;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .topbar {
+                padding: 0 20px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            🩺
+        </div>
+
+        <div>
+            <h4>GlucoGuard AI</h4>
+            <small>Diabetes Risk System</small>
+        </div>
+
+    </div>
+
+
+    <div class="menu-title">
+        Main
+    </div>
+
+
+    <a href="{{ url_for('home') }}"
+       class="nav-link">
+
+        <i class="bi bi-grid-1x2-fill"></i>
+
+        Dashboard
+
+    </a>
+
+
+    <a href="{{ url_for('risk_overview') }}" class="nav-link">
+
+    <i class="bi bi-activity"></i>
+
+    AI Risk Overview
+
+</a>
+
+
+<a href="{{ url_for('home') }}" class="nav-link">
+
+    <i class="bi bi-clipboard2-pulse"></i>
+
+    Health Assessment
+
+</a>
+
+    </a>
+
+
+    <div class="menu-title">
+        Health
+    </div>
+
+
+    <a href="{{ url_for('meal_plan', risk_tier=latest_prediction.risk_tier if latest_prediction else 'Low') }}"
+       class="nav-link">
+
+        <i class="bi bi-egg-fried"></i>
+
+        Meal Plan
+
+    </a>
+
+
+    <a href="{{ url_for('exercise_videos', risk_tier=latest_prediction.risk_tier if latest_prediction else 'Low') }}"
+       class="nav-link">
+
+        <i class="bi bi-person-walking"></i>
+
+        Exercise
+
+    </a>
+
+
+    <a href="{{ url_for('bmi_calculator') }}"
+       class="nav-link">
+
+        <i class="bi bi-calculator"></i>
+
+        BMI Calculator
+
+    </a>
+
+
+    <a href="{{ url_for('progress') }}"
+       class="nav-link">
+
+        <i class="bi bi-graph-up"></i>
+
+        Progress
+
+    </a>
+
+
+    <div class="menu-title">
+        Services
+    </div>
+
+
+    <a href="{{ url_for('doctor_locator') }}"
+       class="nav-link">
+
+        <i class="bi bi-hospital"></i>
+
+        Find Doctor
+
+    </a>
+
+
+    <a href="{{ url_for('appointments') }}"
+       class="nav-link">
+
+        <i class="bi bi-calendar-check"></i>
+
+        Appointments
+
+    </a>
+
+
+    <a href="{{ url_for('medication') }}"
+       class="nav-link">
+
+        <i class="bi bi-capsule"></i>
+
+        Medication
+
+    </a>
+
+
+    <a href="{{ url_for('chatbot') }}"
+       class="nav-link">
+
+        <i class="bi bi-robot"></i>
+
+        AI Assistant
+
+    </a>
+
+
+    <div class="menu-title">
+        Reports
+    </div>
+
+
+    <a href="{{ url_for('monthly_report') }}"
+       class="nav-link">
+
+        <i class="bi bi-file-earmark-bar-graph"></i>
+
+        Monthly Report
+
+    </a>
+
+
+    <a href="{{ url_for('download_report') }}"
+       class="nav-link">
+
+        <i class="bi bi-file-earmark-pdf"></i>
+
+        Download Report
+
+    </a>
+
+
+    <a href="{{ url_for('logout') }}"
+       class="nav-link"
+       style="color:#d05c5c;">
+
+        <i class="bi bi-box-arrow-right"></i>
+
+        Logout
+
+    </a>
+
+</aside>
+
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="main">
+
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+        <div>
+
+            <h5>
+                Dashboard
+            </h5>
+
+            <p>
+                Monitor your diabetes health and AI risk
+            </p>
+
+        </div>
+
+
+        <div class="user-box">
+
+            <div class="avatar">
+
+                {{ current_user.name[0]|upper }}
+
+            </div>
+
+            <div>
+
+                <div class="user-name">
+                    {{ current_user.name }}
+                </div>
+
+                <a href="{{ url_for('logout') }}"
+                   class="logout">
+
+                    Logout
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- CONTENT -->
+
+    <section class="content">
+
+
+        <!-- WELCOME -->
+
+        <div class="welcome">
+
+            <h2>
+                Hello, {{ current_user.name }} 👋
+            </h2>
+
+            <p>
+                Here is your latest health overview.
+            </p>
+
+        </div>
+
+
+
+        <!-- =================================================
+             STAT CARDS
+        ================================================= -->
+
+        <div class="row g-3 mb-4">
+
+
+            <!-- RISK -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-label">
+                        Diabetes Risk
+                    </div>
+
+                    <div class="stat-value">
+
+                        {% if latest_prediction %}
+
+                            {{ latest_prediction.probability|float|round(0)|int }}%
+
+                        {% else %}
+
+                            No Data
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- GLUCOSE -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-icon">
+                            <i class="bi bi-droplet-fill"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-label">
+                        Blood Glucose
+                    </div>
+
+                    <div class="stat-value">
+
+                        {% if latest_prediction %}
+
+                            {{ latest_prediction.glucose }}
+
+                            <span class="stat-unit">
+                                mg/dL
+                            </span>
+
+                        {% else %}
+
+                            No Data
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- BMI -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-label">
+                        BMI
+                    </div>
+
+                    <div class="stat-value">
+
+                        {% if latest_prediction %}
+
+                            {{ latest_prediction.bmi }}
+
+                        {% else %}
+
+                            No Data
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- AGE -->
+
+            <div class="col-xl-3 col-md-6">
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-icon">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+
+                    </div>
+
+                    <div class="stat-label">
+                        Age
+                    </div>
+
+                    <div class="stat-value">
+
+                        {% if current_user.age %}
+
+                            {{ current_user.age }}
+
+                        {% else %}
+
+                            --
+
+                        {% endif %}
+
+                        <span class="stat-unit">
+                            years
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             MAIN DASHBOARD CARDS
+        ================================================= -->
+
+        <div class="row g-4">
+
+
+            <!-- AI RISK -->
+
+            <div class="col-lg-5">
+
+                <div class="card-box risk-card">
+
+                    <div class="section-title text-start">
+
+                        🤖 AI Risk Overview
+
+                    </div>
+
+
+                    {% set risk_probability =
+                        latest_prediction.probability|float
+                        if latest_prediction
+                        else 0
+                    %}
+
+
+                    <div class="risk-circle"
+                         style="--risk-angle: {{ risk_probability * 3.6 }}deg;">
+
+                        <div class="risk-number">
+
+                            <strong>
+                                {{ risk_probability|round(0)|int }}
+                            </strong>
+
+                            <span>
+                                / 100
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if latest_prediction %}
+
+                        {% if latest_prediction.risk_tier == "Low" %}
+
+                            <div class="risk-level risk-low">
+                                Low Risk
+                            </div>
+
+                            <div class="risk-description">
+
+                                Your AI-predicted diabetes risk is
+                                <strong>Low</strong>.
+
+                                Continue maintaining healthy habits,
+                                regular physical activity and a
+                                balanced diet.
+
+                            </div>
+
+
+                        {% elif latest_prediction.risk_tier == "Medium" %}
+
+                            <div class="risk-level risk-medium">
+                                Medium Risk
+                            </div>
+
+                            <div class="risk-description">
+
+                                Your AI-predicted diabetes risk is
+                                <strong>Medium</strong>.
+
+                                Monitor your health values regularly
+                                and maintain a healthy lifestyle.
+
+                            </div>
+
+
+                        {% else %}
+
+                            <div class="risk-level risk-high">
+                                High Risk
+                            </div>
+
+                            <div class="risk-description">
+
+                                Your AI-predicted diabetes risk is
+                                <strong>High</strong>.
+
+                                Consider discussing your result
+                                with a qualified healthcare professional.
+
+                            </div>
+
+                        {% endif %}
+
+                    {% else %}
+
+                        <div class="risk-level">
+                            No Risk Data
+                        </div>
+
+                        <div class="risk-description">
+
+                            Complete a health assessment to generate
+                            your AI diabetes risk score.
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <div style="
+                        margin-top:20px;
+                        padding:15px;
+                        background:#f4faf7;
+                        border-radius:14px;
+                        font-size:13px;
+                        color:#667b73;
+                        line-height:1.6;
+                        text-align:left;
+                    ">
+
+                        <strong>
+                            🤖 How is this calculated?
+                        </strong>
+
+                        <br>
+
+                        The AI model analyzes your health information,
+                        including age, BMI, blood glucose, HbA1c,
+                        hypertension, heart disease and smoking history.
+
+                        <br><br>
+
+                        The percentage represents the model's estimated
+                        probability of diabetes risk.
+
+                    </div>
+
+
+                    <div class="mt-3">
+
+                        <a href="{{ url_for('risk_overview') }}"
+                           class="primary-btn">
+
+                            View Full Risk Overview
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- HEALTH VALUES -->
+
+            <div class="col-lg-7">
+
+                <div class="card-box">
+
+                    <div class="section-title">
+
+                        📊 Latest Health Values
+
+                    </div>
+
+
+                    {% if latest_prediction %}
+
+
+                        <!-- GLUCOSE -->
+
+                        <div class="health-item">
+
+                            <div class="health-left">
+
+                                <div class="health-icon">
+
+                                    <i class="bi bi-droplet-fill"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <div class="health-name">
+                                        Blood Glucose
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="health-value">
+
+                                {{ latest_prediction.glucose }}
+                                mg/dL
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- BMI -->
+
+                        <div class="health-item">
+
+                            <div class="health-left">
+
+                                <div class="health-icon">
+
+                                    <i class="bi bi-person-fill"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <div class="health-name">
+                                        BMI
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="health-value">
+
+                                {{ latest_prediction.bmi }}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- AGE -->
+
+                        <div class="health-item">
+
+                            <div class="health-left">
+
+                                <div class="health-icon">
+
+                                    <i class="bi bi-calendar-event"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <div class="health-name">
+                                        Age
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="health-value">
+
+                                {{ current_user.age or "--" }}
+
+                                {% if current_user.age %}
+                                    years
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- RISK -->
+
+                        <div class="health-item">
+
+                            <div class="health-left">
+
+                                <div class="health-icon">
+
+                                    <i class="bi bi-shield-fill-check"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <div class="health-name">
+                                        Risk Level
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="health-value">
+
+                                {{ latest_prediction.risk_tier }}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PROBABILITY -->
+
+                        <div class="health-item">
+
+                            <div class="health-left">
+
+                                <div class="health-icon">
+
+                                    <i class="bi bi-percent"></i>
+
+                                </div>
+
+                                <div>
+
+                                    <div class="health-name">
+                                        AI Probability
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="health-value">
+
+                                {{ latest_prediction.probability }}%
+
+                            </div>
+
+                        </div>
+
+
+                    {% else %}
+
+                        <div class="empty-state">
+
+                            <i class="bi bi-clipboard2-pulse"></i>
+
+                            <p>
+                                No health assessment available yet.
+                            </p>
+
+                            <a href="{{ url_for('home') }}"
+                               class="primary-btn">
+
+                                Start Assessment
+
+                            </a>
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             QUICK ACTIONS
+        ================================================= -->
+
+        <div class="card-box mt-4">
+
+            <div class="section-title">
+                ⚡ Quick Actions
+            </div>
+
+            <div class="row g-3">
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('bmi_calculator') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-calculator"></i>
+
+                        <strong>
+                            BMI Calculator
+                        </strong>
+
+                        <span>
+                            Calculate your BMI
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('meal_plan',
+                        risk_tier=latest_prediction.risk_tier
+                        if latest_prediction else 'Low') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-egg-fried"></i>
+
+                        <strong>
+                            Meal Plan
+                        </strong>
+
+                        <span>
+                            Personalized meals
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('exercise_videos',
+                        risk_tier=latest_prediction.risk_tier
+                        if latest_prediction else 'Low') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-person-walking"></i>
+
+                        <strong>
+                            Exercise
+                        </strong>
+
+                        <span>
+                            Recommended activities
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('appointments') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-calendar-check"></i>
+
+                        <strong>
+                            Appointment
+                        </strong>
+
+                        <span>
+                            Book a doctor visit
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('doctor_locator') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-hospital"></i>
+
+                        <strong>
+                            Find Doctor
+                        </strong>
+
+                        <span>
+                            Nearby healthcare
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('chatbot') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-robot"></i>
+
+                        <strong>
+                            AI Assistant
+                        </strong>
+
+                        <span>
+                            Ask health questions
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('progress') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-graph-up"></i>
+
+                        <strong>
+                            Progress
+                        </strong>
+
+                        <span>
+                            Track your progress
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-3 col-6">
+
+                    <a href="{{ url_for('monthly_report') }}"
+                       class="quick-action">
+
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+
+                        <strong>
+                            Monthly Report
+                        </strong>
+
+                        <span>
+                            View health summary
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PREDICTION HISTORY
+        ================================================= -->
+
+        <div class="card-box table-card">
+
+            <div class="d-flex justify-content-between
+                        align-items-center mb-3">
+
+                <div class="section-title mb-0">
+                    📈 Prediction History
+                </div>
+
+                <a href="{{ url_for('progress') }}"
+                   class="primary-btn">
+
+                    View Progress
+
+                </a>
+
+            </div>
+
+
+            {% if predictions %}
+
+                <div class="table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Glucose
+                                </th>
+
+                                <th>
+                                    BMI
+                                </th>
+
+                                <th>
+                                    Risk
+                                </th>
+
+                                <th>
+                                    Probability
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for prediction in predictions[-10:]|reverse %}
+
+                                <tr>
+
+                                    <td>
+
+                                        {% if prediction.date %}
+
+                                            {{ prediction.date.strftime("%d-%b-%Y") }}
+
+                                        {% else %}
+
+                                            --
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ prediction.glucose }}
+                                        mg/dL
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ prediction.bmi }}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if prediction.risk_tier == "Low" %}
+
+                                            <span class="risk-badge badge-low">
+                                                Low
+                                            </span>
+
+                                        {% elif prediction.risk_tier == "Medium" %}
+
+                                            <span class="risk-badge badge-medium">
+                                                Medium
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="risk-badge badge-high">
+                                                High
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ prediction.probability }}%
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <i class="bi bi-graph-up"></i>
+
+                    <p>
+                        No prediction history available.
+                    </p>
+
+                    <p style="font-size:12px;">
+                        Complete your first diabetes risk assessment
+                        to see your results here.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+    </section>
+
+</main>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
 </body>
+
 </html>
+```

@@ -1,21 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_lang or 'en' }}">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{{ t.medication_title }}</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <title>
+        💊 Medication - Diabetes Care
+    </title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 
     <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             background: #f4faf7;
             font-family: Arial, Helvetica, sans-serif;
-            color: #14251f;
+            color: #17352d;
         }
 
         .app-layout {
@@ -23,18 +34,26 @@
             min-height: 100vh;
         }
 
-        /* ================= SIDEBAR ================= */
+        /* =================================================
+           SIDEBAR
+        ================================================= */
 
         .sidebar {
             width: 270px;
             min-height: 100vh;
+
             background: #f7fcfa;
+
             border-right: 1px solid #dcebe5;
+
             padding: 22px 16px;
+
             position: fixed;
+
             left: 0;
             top: 0;
             bottom: 0;
+
             overflow-y: auto;
         }
 
@@ -42,18 +61,29 @@
             display: flex;
             align-items: center;
             gap: 12px;
+
             padding: 5px 12px 25px;
         }
 
         .brand-icon {
             width: 42px;
             height: 42px;
+
             border-radius: 50%;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #009b79,
+                    #d4bd32
+                );
+
+            color: white;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #009b79, #d4bd32);
-            color: white;
+
             font-size: 22px;
         }
 
@@ -71,12 +101,19 @@
         .nav-item {
             display: flex;
             align-items: center;
+
             gap: 13px;
+
             padding: 11px 13px;
+
             border-radius: 25px;
+
             color: #17352d;
+
             text-decoration: none;
+
             font-size: 15px;
+
             transition: 0.2s;
         }
 
@@ -93,42 +130,64 @@
         .nav-icon {
             width: 22px;
             text-align: center;
+            font-size: 17px;
         }
 
         .sidebar-bottom {
             margin-top: 25px;
+
             border-top: 1px solid #dcebe5;
+
             padding-top: 18px;
         }
 
         .language-select {
             width: 100%;
+
             border: 1px solid #d6e6e0;
+
             border-radius: 25px;
+
             background: white;
+
             padding: 10px 14px;
+
             color: #17352d;
+
             margin-bottom: 12px;
         }
 
         .signout {
             display: block;
+
             padding: 10px 13px;
+
             color: #526a62;
+
             text-decoration: none;
         }
 
-        /* ================= MAIN ================= */
+        .signout:hover {
+            color: #c62828;
+        }
+
+        /* =================================================
+           MAIN
+        ================================================= */
 
         .main-content {
             margin-left: 270px;
+
             width: calc(100% - 270px);
+
             min-height: 100vh;
         }
 
         .top-header {
             padding: 28px 32px;
+
             border-bottom: 1px solid #dcebe5;
+
             background: #f7fcfa;
         }
 
@@ -140,228 +199,554 @@
 
         .page-subtitle {
             color: #71847d;
-            margin: 5px 0 0;
+
+            margin-top: 5px;
+            margin-bottom: 0;
         }
 
         .content-area {
             padding: 30px;
+
+            max-width: 1100px;
         }
 
-        /* ================= CARDS ================= */
+        /* =================================================
+           CARD
+        ================================================= */
 
         .card-custom {
             background: white;
+
             border: 1px solid #d8e9e2;
+
             border-radius: 22px;
-            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
-            padding: 25px;
-            margin-bottom: 20px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(30, 100, 78, 0.05);
+
+            margin-bottom: 25px;
         }
 
-        .section-title {
-            font-size: 20px;
+        .card-title {
+            font-size: 21px;
+
             font-weight: 700;
-            margin-bottom: 18px;
+
+            margin-bottom: 22px;
         }
 
-        .medicine-card {
+        /* =================================================
+           FORM
+        ================================================= */
+
+        .form-label {
+            font-weight: 600;
+
+            color: #36574d;
+        }
+
+        .form-control {
+            border: 1px solid #cfe3db;
+
+            border-radius: 12px;
+
+            padding: 12px;
+        }
+
+        .form-control:focus {
+            border-color: #009b79;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(0, 155, 121, 0.1);
+        }
+
+        .book-btn {
+            width: 100%;
+
+            border: none;
+
+            border-radius: 25px;
+
+            padding: 13px;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #009b79,
+                    #35ad6d,
+                    #d5bc32
+                );
+
+            cursor: pointer;
+        }
+
+        .book-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* =================================================
+           MEDICATION CARD
+        ================================================= */
+
+        .medication-card {
+
             border: 1px solid #dcebe5;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
+
+            border-radius: 17px;
+
+            padding: 22px;
+
+            margin-bottom: 16px;
+
             background: #f8fcfa;
         }
 
         .medicine-name {
-            font-size: 18px;
+
+            font-size: 20px;
+
             font-weight: 700;
-            color: #087e65;
+
+            color: #008b6d;
+
+            margin-bottom: 15px;
         }
 
         .medicine-info {
-            color: #61756d;
+
+            color: #526a62;
+
             margin-top: 8px;
-            line-height: 1.6;
+
+            font-size: 15px;
         }
 
-        .time-badge {
-            display: inline-block;
-            padding: 6px 12px;
+        .medicine-info strong {
+
+            color: #36574d;
+        }
+
+        .delete-btn {
+
+            border: none;
+
+            background: #fde8e8;
+
+            color: #c62828;
+
             border-radius: 20px;
+
+            padding: 8px 17px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+
+            background: #c62828;
+
+            color: white;
+        }
+
+        .empty-message {
+
+            text-align: center;
+
+            padding: 35px;
+
+            color: #71847d;
+        }
+
+        /* =================================================
+           FLASH
+        ================================================= */
+
+        .flash-message {
+
             background: #e6f5ef;
-            color: #008b6d;
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 8px;
+
+            color: #087e65;
+
+            border: 1px solid #cce9df;
+
+            border-radius: 12px;
+
+            padding: 13px 16px;
+
+            margin-bottom: 20px;
         }
 
-        .warning-box {
-            background: #fff8e6;
-            border: 1px solid #f0dfaa;
+        /* =================================================
+           INFORMATION BOX
+        ================================================= */
+
+        .info-box {
+
+            background: #f7fcfa;
+
+            border: 1px solid #dcebe5;
+
             border-radius: 15px;
-            padding: 18px;
-            color: #705b18;
+
+            padding: 20px;
+
+            margin-bottom: 25px;
         }
 
-        .back-btn {
-            display: inline-block;
-            padding: 11px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            color: white;
-            background: linear-gradient(
-                90deg,
-                #009b79,
-                #35ad6d,
-                #d5bc32
-            );
-            font-weight: 600;
+        .info-box h5 {
+
+            font-weight: 700;
+
+            margin-bottom: 10px;
         }
 
-        .back-btn:hover {
-            color: white;
-            opacity: 0.9;
+        .info-box p {
+
+            color: #526a62;
+
+            margin-bottom: 8px;
         }
 
-        /* ================= MOBILE ================= */
+        /* =================================================
+           MOBILE
+        ================================================= */
 
         @media (max-width: 700px) {
 
             .sidebar {
-                position: relative;
-                width: 100%;
-                min-height: auto;
-            }
 
-            .main-content {
-                margin-left: 0;
+                position: relative;
+
                 width: 100%;
+
+                min-height: auto;
+
+                height: auto;
             }
 
             .app-layout {
+
                 flex-direction: column;
             }
 
+            .main-content {
+
+                margin-left: 0;
+
+                width: 100%;
+            }
+
             .content-area {
+
                 padding: 18px;
             }
+
+            .top-header {
+
+                padding: 22px 18px;
+            }
+
+            .page-title {
+
+                font-size: 26px;
+            }
+
+            .card-custom {
+
+                padding: 20px;
+            }
         }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="app-layout">
 
-    <!-- ================= SIDEBAR ================= -->
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================= -->
 
     <aside class="sidebar">
 
+
         <div class="brand">
-            <div class="brand-icon">♡</div>
+
+            <div class="brand-icon">
+                ♡
+            </div>
+
             <div class="brand-name">
                 {{ t.brand_name }}
             </div>
+
         </div>
+
 
         <nav class="nav-menu">
 
-            <a href="/dashboard" class="nav-item">
-                <span class="nav-icon">⌂</span>
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
                 {{ t.nav_dashboard }}
+
             </a>
 
-            <a href="/" class="nav-item">
-                <span class="nav-icon">♙</span>
+
+            <a
+                href="{{ url_for('home') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♙
+                </span>
+
                 {{ t.nav_patient_data }}
+
             </a>
 
-            <a href="/" class="nav-item">
-                <span class="nav-icon">⌁</span>
+
+            <a
+                href="{{ url_for('dashboard') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌁
+                </span>
+
                 {{ t.nav_glucose }}
+
             </a>
 
-            <a href="/meal-plan/{{ risk_tier }}" class="nav-item">
-                <span class="nav-icon">♡</span>
+
+            <a
+                href="{{ url_for(
+                    'meal_plan',
+                    risk_tier=risk_tier
+                ) }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♡
+                </span>
+
                 {{ t.nav_meals }}
+
             </a>
 
-            <a href="/medication" class="nav-item active">
-                <span class="nav-icon">◈</span>
+
+            <a
+                href="{{ url_for('medication') }}"
+                class="nav-item active">
+
+                <span class="nav-icon">
+                    ◈
+                </span>
+
                 {{ t.nav_medication }}
+
             </a>
 
-            <a href="/appointments" class="nav-item">
-                <span class="nav-icon">□</span>
+
+            <a
+                href="{{ url_for('appointments') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    □
+                </span>
+
                 {{ t.nav_appointments }}
+
             </a>
 
-            <a href="/doctor-locator" class="nav-item">
-                <span class="nav-icon">⌖</span>
+
+            <a
+                href="{{ url_for('doctor_locator') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌖
+                </span>
+
                 {{ t.nav_hospitals }}
+
             </a>
 
-            <a href="/exercise-videos/{{ risk_tier }}" class="nav-item">
-                <span class="nav-icon">♧</span>
+
+            <a
+                href="{{ url_for(
+                    'exercise_videos',
+                    risk_tier=risk_tier
+                ) }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ♧
+                </span>
+
                 {{ t.nav_exercise }}
+
             </a>
 
-            <a href="/progress" class="nav-item">
-                <span class="nav-icon">⌁</span>
+
+            <a
+                href="{{ url_for('progress') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⌁
+                </span>
+
                 {{ t.nav_progress }}
+
             </a>
 
-            <a href="/download-report" class="nav-item">
-                <span class="nav-icon">▤</span>
+
+            <a
+                href="{{ url_for('download_report') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ▤
+                </span>
+
                 {{ t.nav_records }}
+
             </a>
 
-            <a href="/bmi-calculator" class="nav-item">
-                <span class="nav-icon">⚖</span>
+
+            <a
+                href="{{ url_for('bmi_calculator') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ⚖
+                </span>
+
                 {{ t.nav_bmi }}
+
             </a>
 
-            <a href="/monthly-report" class="nav-item">
-                <span class="nav-icon">▧</span>
+
+            <a
+                href="{{ url_for('monthly_report') }}"
+                class="nav-item">
+
+                <span class="nav-icon">
+                    ▧
+                </span>
+
                 {{ t.nav_monthly_report }}
+
             </a>
+
 
         </nav>
 
-        <!-- ================= LANGUAGE ================= -->
 
         <div class="sidebar-bottom">
 
-            <select class="language-select"
-                    onchange="changeLanguage(this.value)">
 
-                <option value="en">English</option>
-                <option value="hi">हिन्दी</option>
-                <option value="kn">ಕನ್ನಡ</option>
+            <select
+                class="language-select"
+                onchange="changeLanguage(this.value)">
+
+
+                <option
+                    value="en"
+                    {% if session.get('language', 'en') == 'en' %}
+                    selected
+                    {% endif %}>
+
+                    English
+
+                </option>
+
+
+                <option
+                    value="hi"
+                    {% if session.get('language', 'en') == 'hi' %}
+                    selected
+                    {% endif %}>
+
+                    हिन्दी
+
+                </option>
+
+
+                <option
+                    value="kn"
+                    {% if session.get('language', 'en') == 'kn' %}
+                    selected
+                    {% endif %}>
+
+                    ಕನ್ನಡ
+
+                </option>
+
 
             </select>
 
-            <a href="/logout" class="signout">
-                ⇥ &nbsp; {{ t.logout }}
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="signout">
+
+                ⇥ &nbsp; {{ t.nav_signout }}
+
             </a>
 
+
         </div>
+
 
     </aside>
 
 
-    <!-- ================= MAIN CONTENT ================= -->
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================= -->
 
     <main class="main-content">
+
 
         <header class="top-header">
 
             <h1 class="page-title">
-                💊 {{ t.medication_title }}
+
+                💊 Medication
+
             </h1>
 
             <p class="page-subtitle">
-                {{ t.medication_subtitle }}
+
+                Keep track of your diabetes medicines
+                and medication reminders.
+
             </p>
 
         </header>
@@ -369,100 +754,349 @@
 
         <div class="content-area">
 
-            <!-- ================= MEDICATION INFO ================= -->
+
+            <!-- =================================================
+                 FLASH MESSAGE
+            ================================================= -->
+
+            {% with messages = get_flashed_messages() %}
+
+                {% if messages %}
+
+                    {% for message in messages %}
+
+                        <div class="flash-message">
+
+                            ✓ {{ message }}
+
+                        </div>
+
+                    {% endfor %}
+
+                {% endif %}
+
+            {% endwith %}
+
+
+            <!-- =================================================
+                 INFORMATION
+            ================================================= -->
+
+            <div class="info-box">
+
+                <h5>
+                    ⏰ Follow your doctor's prescribed schedule
+                </h5>
+
+                <p>
+                    Record your prescribed diabetes medicines,
+                    dosage and reminder time here.
+                </p>
+
+                <p>
+                    ⚠️ Do not change the dose, stop medicines,
+                    or start a new medicine without consulting
+                    a qualified healthcare professional.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 ADD MEDICATION
+            ================================================= -->
 
             <div class="card-custom">
 
-                <h2 class="section-title">
-                    💊 {{ t.medication_management }}
+
+                <h2 class="card-title">
+
+                    💊 Add Medication
+
                 </h2>
 
 
-                <div class="medicine-card">
+                <form
+                    action="{{ url_for('medication') }}"
+                    method="POST">
 
-                    <div class="medicine-name">
-                        {{ t.diabetes_medication }}
+
+                    <div class="row">
+
+
+                        <!-- MEDICINE NAME -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label
+                                for="medicine_name"
+                                class="form-label">
+
+                                💊 Medicine Name
+
+                            </label>
+
+                            <input
+                                type="text"
+                                id="medicine_name"
+                                name="medicine_name"
+                                class="form-control"
+                                placeholder="Example: Metformin"
+                                required>
+
+                        </div>
+
+
+                        <!-- DOSAGE -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label
+                                for="dosage"
+                                class="form-label">
+
+                                💊 Dosage
+
+                            </label>
+
+                            <input
+                                type="text"
+                                id="dosage"
+                                name="dosage"
+                                class="form-control"
+                                placeholder="Example: 500 mg">
+
+                        </div>
+
+
+                        <!-- TIME -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label
+                                for="time"
+                                class="form-label">
+
+                                ⏰ Reminder Time
+
+                            </label>
+
+                            <input
+                                type="time"
+                                id="time"
+                                name="time"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+
+                        <!-- NOTES -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label
+                                for="notes"
+                                class="form-label">
+
+                                📝 Instructions / Notes
+
+                            </label>
+
+                            <input
+                                type="text"
+                                id="notes"
+                                name="notes"
+                                class="form-control"
+                                placeholder="Example: After breakfast">
+
+                        </div>
+
+
                     </div>
 
-                    <div class="medicine-info">
-                        {{ t.diabetes_medication_info }}
+
+                    <!-- SUBMIT -->
+
+                    <div class="mt-3">
+
+                        <button
+                            type="submit"
+                            class="book-btn">
+
+                            ➕ Add Medication Reminder
+
+                        </button>
+
                     </div>
 
-                    <span class="time-badge">
-                        ⏰ {{ t.doctor_schedule }}
-                    </span>
 
-                </div>
+                </form>
 
-
-                <div class="medicine-card">
-
-                    <div class="medicine-name">
-                        {{ t.blood_sugar_monitoring }}
-                    </div>
-
-                    <div class="medicine-info">
-                        {{ t.blood_sugar_monitoring_info }}
-                    </div>
-
-                    <span class="time-badge">
-                        ◉ {{ t.monitoring_advice }}
-                    </span>
-
-                </div>
-
-
-                <div class="medicine-card">
-
-                    <div class="medicine-name">
-                        {{ t.medication_safety }}
-                    </div>
-
-                    <div class="medicine-info">
-                        {{ t.medication_safety_info }}
-                    </div>
-
-                </div>
 
             </div>
 
 
-            <!-- ================= REMINDER ================= -->
+            <!-- =================================================
+                 MEDICATION LIST
+            ================================================= -->
 
             <div class="card-custom">
 
-                <h2 class="section-title">
-                    ⏰ {{ t.medication_reminder }}
+
+                <h2 class="card-title">
+
+                    🔔 Your Medication Reminders
+
                 </h2>
 
-                <div class="warning-box">
 
-                    <strong>
-                        {{ t.important }}
-                    </strong>
+                {% if medications %}
 
-                    <p class="mb-0 mt-2">
-                        {{ t.medication_warning }}
-                    </p>
+    {% for medication in medications %}
 
-                </div>
+        <div class="medication-card"
+             data-medication-id="{{ medication.id }}"
+             data-medication-name="{{ medication.medicine_name }}"
+             data-medication-dosage="{{ medication.dosage or '' }}"
+             data-medication-time="{{ medication.time }}"
+             data-medication-notes="{{ medication.notes or '' }}">
+
+            <div class="row align-items-center">
+
+                                <!-- INFORMATION -->
+
+                                <div class="col-md-8">
+
+
+                                    <div class="medicine-name">
+
+                                        💊
+                                        {{ medication.medicine_name }}
+
+                                    </div>
+
+
+                                    {% if medication.dosage %}
+
+                                        <div class="medicine-info">
+
+                                            💊
+
+                                            <strong>
+                                                Dosage:
+                                            </strong>
+
+                                            {{ medication.dosage }}
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                    <div class="medicine-info">
+
+                                        ⏰
+
+                                        <strong>
+                                            Reminder Time:
+                                        </strong>
+
+                                        {{ medication.time }}
+
+                                    </div>
+
+
+                                    {% if medication.notes %}
+
+                                        <div class="medicine-info">
+
+                                            📝
+
+                                            <strong>
+                                                Instructions / Notes:
+                                            </strong>
+
+                                            {{ medication.notes }}
+
+                                        </div>
+
+                                    {% endif %}
+
+
+                                </div>
+
+
+                                <!-- DELETE -->
+
+                                <div
+                                    class="col-md-4 text-md-end mt-3 mt-md-0">
+
+
+                                    <form
+                                        action="{{ url_for(
+                                            'delete_medication',
+                                            medication_id=medication.id
+                                        ) }}"
+                                        method="POST">
+
+
+                                        <button
+                                            type="submit"
+                                            class="delete-btn"
+                                            onclick="return confirm('Are you sure you want to delete this medication reminder?');">
+
+                                            🗑 Delete
+
+                                        </button>
+
+
+                                    </form>
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+
+                {% else %}
+
+
+                    <div class="empty-message">
+
+                        <div style="font-size: 45px;">
+                            💊
+                        </div>
+
+                        <h5>
+                            No medication reminders yet
+                        </h5>
+
+                        <p>
+                            Add your first medication above
+                            to create a reminder.
+                        </p>
+
+                    </div>
+
+
+                {% endif %}
+
 
             </div>
 
-
-            <!-- ================= BACK ================= -->
-
-            <div class="card-custom text-center">
-
-                <a href="/dashboard" class="back-btn">
-                    ← {{ t.back_dashboard }}
-                </a>
-
-            </div>
 
         </div>
 
     </main>
+
 
 </div>
 
@@ -470,10 +1104,363 @@
 <script>
 
 function changeLanguage(language) {
-    window.location.href = "/set-language/" + language;
+
+    window.location.href =
+        "/set-language/" + language;
+
 }
+
+
+/* =================================================
+   MEDICATION REMINDER NOTIFICATION
+================================================= */
+
+let notificationPermissionGranted = false;
+
+
+/* Ask permission for browser notifications */
+
+async function requestNotificationPermission() {
+
+    if (!("Notification" in window)) {
+
+        console.log(
+            "This browser does not support notifications."
+        );
+
+        return;
+
+    }
+
+    if (Notification.permission === "granted") {
+
+        notificationPermissionGranted = true;
+
+        return;
+
+    }
+
+    if (Notification.permission !== "denied") {
+
+        const permission =
+            await Notification.requestPermission();
+
+        if (permission === "granted") {
+
+            notificationPermissionGranted = true;
+
+            showReminderStatus(
+                "🔔 Medication notifications enabled."
+            );
+
+        }
+
+    }
+
+}
+
+
+/* Small status message */
+
+function showReminderStatus(message) {
+
+    const existing =
+        document.getElementById(
+            "reminder-status"
+        );
+
+    if (existing) {
+
+        existing.remove();
+
+    }
+
+    const status =
+        document.createElement("div");
+
+    status.id =
+        "reminder-status";
+
+    status.className =
+        "flash-message";
+
+    status.innerHTML =
+        message;
+
+    const contentArea =
+        document.querySelector(
+            ".content-area"
+        );
+
+    if (contentArea) {
+
+        contentArea.prepend(status);
+
+    }
+
+}
+
+
+/* =================================================
+   MEDICATION DATA FROM FLASK
+================================================= */
+
+/* =================================================
+   GET MEDICATION DATA FROM HTML
+================================================= */
+
+const medicationReminders = Array.from(
+    document.querySelectorAll(".medication-card")
+).map(function (card) {
+
+    return {
+
+        id: card.dataset.medicationId,
+
+        name: card.dataset.medicationName,
+
+        dosage: card.dataset.medicationDosage || "",
+
+        time: card.dataset.medicationTime,
+
+        notes: card.dataset.medicationNotes || ""
+
+    };
+
+});
+
+/* =================================================
+   PREVENT REPEATED NOTIFICATIONS
+================================================= */
+
+function alreadyNotified(medicationId) {
+
+    const today =
+        new Date().toISOString().split("T")[0];
+
+    const key =
+        "medication_notification_" +
+        medicationId +
+        "_" +
+        today;
+
+    return localStorage.getItem(key) === "true";
+
+}
+
+
+function markAsNotified(medicationId) {
+
+    const today =
+        new Date().toISOString().split("T")[0];
+
+    const key =
+        "medication_notification_" +
+        medicationId +
+        "_" +
+        today;
+
+    localStorage.setItem(
+        key,
+        "true"
+    );
+
+}
+
+
+/* =================================================
+   SHOW MEDICATION NOTIFICATION
+================================================= */
+
+function showMedicationNotification(
+    medication
+) {
+
+    if (
+        !("Notification" in window) ||
+        Notification.permission !== "granted"
+    ) {
+
+        return;
+
+    }
+
+
+    const notification =
+        new Notification(
+            "💊 MediHive AI Reminder",
+            {
+                body:
+                    "Time to take " +
+                    medication.name +
+                    (
+                        medication.dosage
+                            ? " — " +
+                              medication.dosage
+                            : ""
+                    ) +
+                    (
+                        medication.notes
+                            ? "\n" +
+                              medication.notes
+                            : ""
+                    ),
+
+                icon:
+                    "/static/images/logo.png",
+
+                tag:
+                    "medication-" +
+                    medication.id,
+
+                requireInteraction:
+                    true
+            }
+        );
+
+
+    notification.onclick =
+        function () {
+
+            window.focus();
+
+            notification.close();
+
+        };
+
+
+    markAsNotified(
+        medication.id
+    );
+
+}
+
+
+/* =================================================
+   CHECK REMINDERS
+================================================= */
+
+function checkMedicationReminders(medicationReminders) {
+
+    if (!("Notification" in window)) {
+        return;
+    }
+
+    if (Notification.permission !== "granted") {
+        return;
+    }
+
+    const now = new Date();
+
+    const currentHour =
+        String(now.getHours()).padStart(2, "0");
+
+    const currentMinute =
+        String(now.getMinutes()).padStart(2, "0");
+
+    const currentTime =
+        currentHour + ":" + currentMinute;
+
+    medicationReminders.forEach(
+        function (medication) {
+
+            if (!medication.time) {
+                return;
+            }
+
+            let reminderTime =
+                medication.time.trim();
+
+            reminderTime =
+                reminderTime.substring(0, 5);
+
+            if (reminderTime === currentTime) {
+
+                if (
+                    !alreadyNotified(
+                        medication.id
+                    )
+                ) {
+
+                    showMedicationNotification(
+                        medication
+                    );
+
+                }
+
+            }
+
+        }
+    );
+}
+
+
+/* =================================================
+   START REMINDER SYSTEM
+================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const medicationReminders = Array.from(
+            document.querySelectorAll(".medication-card")
+        ).map(function (card) {
+
+            return {
+
+                id: card.dataset.medicationId,
+
+                name: card.dataset.medicationName,
+
+                dosage: card.dataset.medicationDosage || "",
+
+                time: card.dataset.medicationTime,
+
+                notes: card.dataset.medicationNotes || ""
+
+            };
+
+        });
+
+
+        requestNotificationPermission();
+
+
+        setTimeout(
+            function () {
+
+                checkMedicationReminders(
+                    medicationReminders
+                );
+
+            },
+            1000
+        );
+
+
+        setInterval(
+            function () {
+
+                checkMedicationReminders(
+                    medicationReminders
+                );
+
+            },
+            30000
+        );
+
+    }
+);
 
 </script>
 
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
 </body>
+
 </html>
