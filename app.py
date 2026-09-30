@@ -40,6 +40,7 @@ from werkzeug.security import (
 from models import (
     db,
     User,
+    Doctor,
     Prediction,
     Medication,
     Appointment,
@@ -52,6 +53,7 @@ from chatbot_logic import get_chatbot_response
 from pdf_generator import generate_health_report
 from translations import TRANSLATIONS
 from exercise_data import EXERCISE_VIDEOS
+from services.practo_service import PractoService, PractoAPIError
 
 
 # =========================================================
@@ -66,6 +68,7 @@ load_dotenv()
 # =========================================================
 
 app = Flask(__name__)
+practo_service = PractoService()
 
 app.config["SECRET_KEY"] = os.getenv(
     "SECRET_KEY",
@@ -822,11 +825,11 @@ def home():
 
         if hasattr(
             latest_prediction,
-            "hba1c"
+            "hbA1c_level"
         ):
 
             overview_hba1c = (
-                latest_prediction.hba1c
+                latest_prediction.hbA1c_level
             )
 
     return render_template(
@@ -868,6 +871,18 @@ def home():
             overview_hba1c
 
     )
+
+
+@app.route("/practo-status")
+@login_required
+def practo_status():
+
+    status = practo_service.get_status()
+
+    return {
+        "configured": status["configured"],
+        "status": status["status"]
+    }
 
 
 # =========================================================
@@ -1573,7 +1588,6 @@ def generate_shap_contributions(
 def predict():
 
     try:
-
         # -------------------------------------------------
         # INPUTS
         # -------------------------------------------------
@@ -1588,7 +1602,7 @@ def predict():
         gender = request.form.get(
             "gender",
             "Female"
-        )
+        ).strip()
 
         age = float(
             request.form.get(
@@ -1600,12 +1614,12 @@ def predict():
         location = request.form.get(
             "location",
             "Other"
-        )
+        ).strip()
 
         race = request.form.get(
             "race",
             "Other"
-        )
+        ).strip()
 
         hypertension = int(
             request.form.get(
@@ -1624,7 +1638,7 @@ def predict():
         smoking_history = request.form.get(
             "smoking_history",
             "never"
-        )
+        ).strip()
 
         bmi = float(
             request.form.get(
@@ -1652,57 +1666,29 @@ def predict():
         # -------------------------------------------------
 
         input_data = create_prediction_dataframe(
-
             year=year,
-
             gender=gender,
-
             age=age,
-
             location=location,
-
             race=race,
-
             hypertension=hypertension,
-
             heart_disease=heart_disease,
-
             smoking_history=smoking_history,
-
             bmi=bmi,
-
             hbA1c_level=hbA1c_level,
-
-            blood_glucose_level=
-                blood_glucose_level
-
+            blood_glucose_level=blood_glucose_level
         )
 
-        print(
-            "\n===================================="
-        )
-
-        print(
-            "PATIENT INPUT"
-        )
-
-        print(
-            "===================================="
-        )
-
-        print(
-            input_data
-        )
+        print("\n====================================")
+        print("PATIENT INPUT")
+        print("====================================")
+        print(input_data)
 
         # -------------------------------------------------
         # MODEL
         # -------------------------------------------------
 
-        prediction_result = (
-            model.predict_proba(
-                input_data
-            )
-        )
+        prediction_result = model.predict_proba(input_data)
 
         probability = float(
             prediction_result[0][1]
@@ -1715,27 +1701,12 @@ def predict():
 
         probability_percent = max(
             0,
-            min(
-                100,
-                probability_percent
-            )
+            min(100, probability_percent)
         )
 
-        print(
-            "Class 0:",
-            prediction_result[0][0]
-        )
-
-        print(
-            "Class 1:",
-            prediction_result[0][1]
-        )
-
-        print(
-            "Probability:",
-            probability_percent,
-            "%"
-        )
+        print("Class 0:", prediction_result[0][0])
+        print("Class 1:", prediction_result[0][1])
+        print("Probability:", probability_percent, "%")
 
         # -------------------------------------------------
         # RISK
@@ -1751,79 +1722,60 @@ def predict():
 
         t, lang = get_t()
 
-        risk_tier_display = (
-            get_risk_tier_translated(
-                risk_tier,
-                t
-            )
+        risk_tier_display = get_risk_tier_translated(
+            risk_tier,
+            t
         )
 
         # -------------------------------------------------
         # RECOMMENDATIONS
         # -------------------------------------------------
 
-        recommendations = (
-            get_recommendations(
+        recommendations = get_recommendations(
+            {
+                "blood_glucose_level": blood_glucose_level,
+                "bmi": bmi,
+                "hbA1c_level": hbA1c_level,
+                "age": age,
+                "hypertension": hypertension,
+                "heart_disease": heart_disease
+            },
+            t
+        )
 
-                {
+        # -------------------------------------------------
+        # SHAP EXPLANATION
+        # -------------------------------------------------
 
-                    "blood_glucose_level":
-                        blood_glucose_level,
-
-                    "bmi":
-                        bmi,
-
-                    "hbA1c_level":
-                        hbA1c_level,
-
-                    "age":
-                        age,
-
-                    "hypertension":
-                        hypertension,
-
-                    "heart_disease":
-                        heart_disease
-
-                },
-
-                t
-
-            )
+        shap_contributions = generate_shap_contributions(
+            input_data,
+            t
         )
 
         # -------------------------------------------------
         # SAVE PREDICTION
-        #
-        # Database stores percentage.
+        # Database stores probability as percentage.
         # -------------------------------------------------
 
         new_prediction = Prediction(
-
-            user_id=
-                current_user.id,
-
-            glucose=
-                blood_glucose_level,
-
-            bmi=
-                bmi,
-
-            blood_pressure=
-                0,
-
-            risk_tier=
-                risk_tier,
-
-            probability=
-                probability_percent
-
+            user_id=current_user.id,
+            year=year,
+            gender=gender,
+            age=age,
+            location=location,
+            race=race,
+            hypertension=hypertension,
+            heart_disease=heart_disease,
+            smoking_history=smoking_history,
+            glucose=blood_glucose_level,
+            bmi=bmi,
+            hbA1c_level=hbA1c_level,
+            blood_pressure=0,
+            risk_tier=risk_tier,
+            probability=probability_percent
         )
 
-        db.session.add(
-            new_prediction
-        )
-
+        db.session.add(new_prediction)
         db.session.commit()
 
         print(
@@ -1832,44 +1784,22 @@ def predict():
         )
 
         # -------------------------------------------------
-        # SHAP
-        # -------------------------------------------------
-
-        shap_contributions = (
-            generate_shap_contributions(
-                input_data,
-                t
-            )
-        )
-
-        # -------------------------------------------------
         # RESULT
         # -------------------------------------------------
 
         return render_template(
-
             "result.html",
-
-            risk_tier=
-                risk_tier,
-
-            risk_tier_display=
-                risk_tier_display,
-
-            probability=
-                probability_percent,
-
-            recommendations=
-                recommendations,
-
-            shap_contributions=
-                shap_contributions,
-
-            t=t
-
+            risk_tier=risk_tier,
+            risk_tier_display=risk_tier_display,
+            probability=probability_percent,
+            recommendations=recommendations,
+            shap_contributions=shap_contributions,
+            t=t,
+            current_lang=lang
         )
 
     except Exception as e:
+        db.session.rollback()
 
         print(
             "PREDICTION ERROR:",
@@ -1877,9 +1807,7 @@ def predict():
         )
 
         return (
-
             f"Prediction Error: {str(e)}"
-
         ), 400
 
 
@@ -2178,6 +2106,10 @@ def chatbot():
 
     t, lang = get_t()
 
+    # Keep chatbot conversation in the user's session
+    if "chat_history" not in session:
+        session["chat_history"] = []
+
     reply = None
     mode = None
     user_message = None
@@ -2189,59 +2121,50 @@ def chatbot():
             ""
         ).strip()
 
-        latest_prediction = (
-            Prediction.query
-            .filter_by(
-                user_id=current_user.id
-            )
-            .order_by(
-                Prediction.date.desc()
-            )
-            .first()
-        )
+        if user_message:
 
-        if latest_prediction:
-
-            risk_tier = (
-                latest_prediction.risk_tier
+            latest_prediction = (
+                Prediction.query
+                .filter_by(
+                    user_id=current_user.id
+                )
+                .order_by(
+                    Prediction.date.desc()
+                )
+                .first()
             )
 
-        else:
+            if latest_prediction:
+                risk_tier = latest_prediction.risk_tier
+            else:
+                risk_tier = "Unknown"
 
-            risk_tier = "Unknown"
+            result = get_chatbot_response(
+                user_message,
+                risk_tier,
+                lang
+            )
 
-        result = get_chatbot_response(
+            reply = result.get("reply")
+            mode = result.get("mode")
 
-            user_message,
+            # Add the new conversation to history
+            session["chat_history"].append({
+                "user": user_message,
+                "assistant": reply
+            })
 
-            risk_tier,
-
-            lang
-
-        )
-
-        reply = result.get(
-            "reply"
-        )
-
-        mode = result.get(
-            "mode"
-        )
+            # Tell Flask that the session data changed
+            session.modified = True
 
     return render_template(
-
         "chatbot.html",
-
         reply=reply,
-
         mode=mode,
-
         user_message=user_message,
-
+        chat_history=session.get("chat_history", []),
         t=t,
-
         current_lang=lang
-
     )
 
 
@@ -3007,6 +2930,74 @@ def delete_medication(
 
 
 # =========================================================
+# PRACTO INTEGRATION HELPERS
+# =========================================================
+
+def create_practo_booking(
+    provider_id,
+    appointment_date,
+    appointment_time
+):
+    """
+    Create a Practo appointment booking.
+
+    The actual API call is delegated to PractoService and will only
+    work after official Practo Partner API documentation and
+    credentials are configured.
+    """
+
+    if not practo_service.is_configured():
+        raise PractoAPIError(
+            "Practo API is not configured yet."
+        )
+
+    return practo_service.book_appointment(
+        provider_id=provider_id,
+        appointment_date=appointment_date,
+        appointment_time=appointment_time,
+        patient_data={
+            "user_id": current_user.id,
+            "name": current_user.name,
+            "email": current_user.email
+        }
+    )
+
+
+def search_practo_providers(
+    specialty=None,
+    city=None
+):
+    """Search doctors/hospitals through the Practo service layer."""
+
+    if not practo_service.is_configured():
+        raise PractoAPIError(
+            "Practo API is not configured yet."
+        )
+
+    return practo_service.search_providers(
+        specialty=specialty,
+        city=city
+    )
+
+
+def get_practo_slots(
+    provider_id,
+    appointment_date
+):
+    """Get available Practo appointment slots through the service layer."""
+
+    if not practo_service.is_configured():
+        raise PractoAPIError(
+            "Practo API is not configured yet."
+        )
+
+    return practo_service.get_availability(
+        provider_id=provider_id,
+        appointment_date=appointment_date
+    )
+
+
+# =========================================================
 # APPOINTMENTS
 # =========================================================
 
@@ -3019,10 +3010,6 @@ def appointments():
 
     t, lang = get_t()
 
-    # -----------------------------------------------------
-    # LATEST RISK
-    # -----------------------------------------------------
-
     latest_prediction = (
         Prediction.query
         .filter_by(
@@ -3034,31 +3021,31 @@ def appointments():
         .first()
     )
 
-    if latest_prediction:
+    risk_tier = (
+        latest_prediction.risk_tier
+        if latest_prediction
+        else "Low"
+    )
 
-        risk_tier = (
-            latest_prediction.risk_tier
-        )
-
-    else:
-
+    if risk_tier not in ["Low", "Medium", "High"]:
         risk_tier = "Low"
 
-    if risk_tier not in [
-        "Low",
-        "Medium",
-        "High"
-    ]:
+    doctors = (
+        Doctor.query
+        .order_by(Doctor.name.asc())
+        .all()
+    )
 
-        risk_tier = "Low"
-
-    # -----------------------------------------------------
-    # BOOK APPOINTMENT
-    # -----------------------------------------------------
+    practo_configured = practo_service.is_configured()
 
     if request.method == "POST":
 
-        doctor = request.form.get(
+        doctor_id = request.form.get(
+            "doctor_id",
+            ""
+        ).strip()
+
+        doctor_name = request.form.get(
             "doctor",
             ""
         ).strip()
@@ -3084,58 +3071,37 @@ def appointments():
         ).strip()
 
         # -------------------------------------------------
-        # VALIDATION
+        # FIND REGISTERED DOCTOR
         # -------------------------------------------------
 
-        if not doctor:
+        selected_doctor = None
 
-            flash(
-                t.get(
-                    "select_doctor",
-                    "Please select a doctor."
-                )
-            )
+        if doctor_id:
+            try:
+                selected_doctor = Doctor.query.filter_by(
+                    id=int(doctor_id)
+                ).first()
+            except (ValueError, TypeError):
+                selected_doctor = None
 
-            return redirect(
-                url_for("appointments")
-            )
+        if selected_doctor is None and doctor_name:
+            selected_doctor = Doctor.query.filter_by(
+                name=doctor_name
+            ).first()
 
-        if not hospital:
+        if selected_doctor is None:
+            flash("Please select a registered doctor.")
+            return redirect(url_for("appointments"))
 
-            flash(
-                "Please enter hospital name."
-            )
-
-            return redirect(
-                url_for("appointments")
-            )
+        # -------------------------------------------------
+        # VALIDATE DATE
+        # -------------------------------------------------
 
         if not appointment_date:
-
-            flash(
-                "Please select an appointment date."
-            )
-
-            return redirect(
-                url_for("appointments")
-            )
-
-        if not appointment_time:
-
-            flash(
-                "Please select an appointment time."
-            )
-
-            return redirect(
-                url_for("appointments")
-            )
-
-        # -------------------------------------------------
-        # DATE
-        # -------------------------------------------------
+            flash("Please select an appointment date.")
+            return redirect(url_for("appointments"))
 
         try:
-
             selected_date = datetime.strptime(
                 appointment_date,
                 "%Y-%m-%d"
@@ -3144,109 +3110,119 @@ def appointments():
             today = datetime.now().date()
 
             if selected_date < today:
-
-                flash(
-                    "Appointment date cannot be in the past."
-                )
-
-                return redirect(
-                    url_for("appointments")
-                )
+                flash("Appointment date cannot be in the past.")
+                return redirect(url_for("appointments"))
 
         except ValueError:
-
-            flash(
-                "Invalid appointment date."
-            )
-
-            return redirect(
-                url_for("appointments")
-            )
+            flash("Invalid appointment date.")
+            return redirect(url_for("appointments"))
 
         # -------------------------------------------------
-        # TIME
+        # VALIDATE TIME
         # -------------------------------------------------
+
+        if not appointment_time:
+            flash("Please select an appointment time.")
+            return redirect(url_for("appointments"))
 
         try:
-
             selected_time = datetime.strptime(
                 appointment_time,
                 "%H:%M"
             ).time()
-
         except ValueError:
+            flash("Invalid appointment time.")
+            return redirect(url_for("appointments"))
 
+        if (
+            selected_date == today
+            and selected_time <= datetime.now().time()
+        ):
+            flash("Please select a future appointment time.")
+            return redirect(url_for("appointments"))
+
+        # -------------------------------------------------
+        # PREVENT DOUBLE BOOKING
+        # Pending and Confirmed appointments both reserve
+        # the same doctor/date/time slot.
+        # -------------------------------------------------
+
+        existing_appointment = (
+            Appointment.query
+            .filter_by(
+                doctor_id=selected_doctor.id,
+                appointment_date=appointment_date,
+                appointment_time=appointment_time
+            )
+            .filter(
+                Appointment.status.in_(
+                    ["Pending", "Confirmed"]
+                )
+            )
+            .first()
+        )
+
+        if existing_appointment:
             flash(
-                "Invalid appointment time."
+                "This time slot is already booked for the selected doctor. "
+                "Please choose another time."
             )
-
-            return redirect(
-                url_for("appointments")
-            )
+            return redirect(url_for("appointments"))
 
         # -------------------------------------------------
-        # SAME-DAY TIME
-        # -------------------------------------------------
-
-        if selected_date == today:
-
-            current_time = datetime.now().time()
-
-            if selected_time <= current_time:
-
-                flash(
-                    "Please select a future appointment time."
-                )
-
-                return redirect(
-                    url_for("appointments")
-                )
-
-        # -------------------------------------------------
-        # CREATE
+        # CREATE APPOINTMENT REQUEST
         # -------------------------------------------------
 
         new_appointment = Appointment(
+            user_id=current_user.id,
+            doctor_id=selected_doctor.id,
+            doctor_name=selected_doctor.name,
+            hospital=(
+                selected_doctor.hospital
+                or hospital
+                or "Not specified"
+            ),
+            appointment_date=appointment_date,
+            appointment_time=appointment_time,
+            purpose=reason,
+            status="Pending",
 
-            user_id=
-                current_user.id,
-
-            doctor_name=
-                doctor,
-
-            hospital=
-                hospital,
-
-            appointment_date=
-                appointment_date,
-
-            appointment_time=
-                appointment_time,
-
-            purpose=
-                reason
-
+            # Current appointments use the local doctor system.
+            # These fields will be populated for Practo bookings
+            # after official API access is available.
+            provider="local",
+            external_provider_id=None,
+            external_booking_id=None,
+            external_status=None
         )
 
-        db.session.add(
-            new_appointment
+        db.session.add(new_appointment)
+        db.session.flush()
+
+        notification = Notification(
+            user_id=current_user.id,
+            title="Appointment Request Sent",
+            message=(
+                f"Your appointment request with "
+                f"{selected_doctor.name} on {appointment_date} "
+                f"at {appointment_time} is waiting for doctor confirmation."
+            ),
+            notification_type="appointment",
+            reminder_time=datetime.now()
         )
 
+        db.session.add(notification)
         db.session.commit()
 
         flash(
-            t.get(
-                "appointment_success",
-                "Appointment booked successfully!"
-            )
+            "Appointment request sent successfully! "
+            "Waiting for doctor confirmation."
         )
 
-        return redirect(
-            url_for("appointments")
-        )
+        return redirect(url_for("appointments"))
 
     # -----------------------------------------------------
-    # GET APPOINTMENTS
+    # PATIENT APPOINTMENT HISTORY
     # -----------------------------------------------------
 
     appointments_list = (
@@ -3261,25 +3237,332 @@ def appointments():
         .all()
     )
 
-    # -----------------------------------------------------
-    # RENDER
-    # -----------------------------------------------------
-
     return render_template(
-
         "appointments.html",
-
         t=t,
+        appointments=appointments_list,
+        doctors=doctors,
+        risk_tier=risk_tier,
+        current_lang=lang,
+        practo_configured=practo_configured
+    )
 
-        appointments=
-            appointments_list,
 
-        risk_tier=
-            risk_tier,
+# =========================================================
+# PRACTO APPOINTMENT BOOKING
+# =========================================================
 
-        current_lang=
-            lang
+@app.route(
+    "/appointments/practo/book",
+    methods=["POST"]
+)
+@login_required
+def practo_book_appointment():
 
+    # -----------------------------------------------------
+    # CHECK PRACTO API CONFIGURATION
+    # -----------------------------------------------------
+
+    if not practo_service.is_configured():
+        flash(
+            "Practo booking is not available yet. "
+            "Official Practo Partner API access is required.",
+            "warning"
+        )
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # GET FORM DATA
+    # -----------------------------------------------------
+
+    provider_id = request.form.get(
+        "provider_id",
+        ""
+    ).strip()
+
+    appointment_date = request.form.get(
+        "appointment_date",
+        ""
+    ).strip()
+
+    appointment_time = request.form.get(
+        "appointment_time",
+        ""
+    ).strip()
+
+    purpose = request.form.get(
+        "purpose",
+        ""
+    ).strip()
+
+    consent = request.form.get(
+        "practo_consent"
+    )
+
+    # -----------------------------------------------------
+    # VALIDATE CONSENT
+    # -----------------------------------------------------
+
+    if consent != "yes":
+        flash(
+            "Please provide consent before sending "
+            "your information to Practo.",
+            "warning"
+        )
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # VALIDATE PROVIDER
+    # -----------------------------------------------------
+
+    if not provider_id:
+        flash(
+            "A Practo doctor/provider is required.",
+            "warning"
+        )
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # VALIDATE DATE
+    # -----------------------------------------------------
+
+    if not appointment_date:
+        flash(
+            "Please select an appointment date.",
+            "warning"
+        )
+        return redirect(
+            url_for("appointments")
+        )
+
+    try:
+
+        selected_date = datetime.strptime(
+            appointment_date,
+            "%Y-%m-%d"
+        ).date()
+
+    except ValueError:
+
+        flash(
+            "Invalid Practo appointment date.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("appointments")
+        )
+
+    today = datetime.now().date()
+
+    if selected_date < today:
+
+        flash(
+            "Appointment date cannot be in the past.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # VALIDATE TIME
+    # -----------------------------------------------------
+
+    if not appointment_time:
+        flash(
+            "Please select an appointment time.",
+            "warning"
+        )
+        return redirect(
+            url_for("appointments")
+        )
+
+    try:
+
+        selected_time = datetime.strptime(
+            appointment_time,
+            "%H:%M"
+        ).time()
+
+    except ValueError:
+
+        flash(
+            "Invalid Practo appointment time.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("appointments")
+        )
+
+    if (
+        selected_date == today
+        and selected_time <= datetime.now().time()
+    ):
+
+        flash(
+            "Please select a future appointment time.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # CALL PRACTO PARTNER API
+    # -----------------------------------------------------
+
+    try:
+
+        booking_result = practo_service.book_appointment(
+            provider_id=provider_id,
+            appointment_date=appointment_date,
+            appointment_time=appointment_time,
+            patient_data={
+                "user_id": current_user.id,
+                "name": current_user.name,
+                "email": current_user.email,
+                "purpose": purpose
+            }
+        )
+
+    except PractoAPIError as error:
+
+        flash(
+            str(error),
+            "warning"
+        )
+
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # VALIDATE API RESPONSE
+    # -----------------------------------------------------
+
+    if not isinstance(
+        booking_result,
+        dict
+    ):
+
+        flash(
+            "Invalid response received from Practo.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # EXTRACT BOOKING INFORMATION
+    # -----------------------------------------------------
+
+    provider_name = booking_result.get(
+        "provider_name",
+        "Practo Doctor"
+    )
+
+    clinic_name = booking_result.get(
+        "clinic_name",
+        "Practo"
+    )
+
+    booking_status = booking_result.get(
+        "status",
+        "Pending"
+    )
+
+    booking_id = booking_result.get(
+        "booking_id"
+    )
+
+    # -----------------------------------------------------
+    # CREATE LOCAL APPOINTMENT RECORD
+    # -----------------------------------------------------
+
+    new_appointment = Appointment(
+        user_id=current_user.id,
+        doctor_id=None,
+        doctor_name=provider_name,
+        hospital=clinic_name,
+        appointment_date=appointment_date,
+        appointment_time=appointment_time,
+        purpose=purpose,
+        status=booking_status,
+        provider="practo",
+        external_provider_id=provider_id,
+        external_booking_id=booking_id,
+        external_status=booking_status,
+        practo_consent=True,
+        practo_consent_at=datetime.utcnow()
+    )
+
+    db.session.add(
+        new_appointment
+    )
+
+    # -----------------------------------------------------
+    # CREATE NOTIFICATION
+    # -----------------------------------------------------
+
+    notification = Notification(
+        user_id=current_user.id,
+        title="Practo Appointment Request",
+        message=(
+            "Your Practo appointment request has "
+            "been submitted successfully."
+        ),
+        notification_type="appointment",
+        reminder_time=datetime.now()
+    )
+
+    db.session.add(
+        notification
+    )
+
+    # -----------------------------------------------------
+    # SAVE EVERYTHING
+    # -----------------------------------------------------
+
+    try:
+
+        db.session.commit()
+
+    except Exception:
+
+        db.session.rollback()
+
+        flash(
+            "Unable to save the Practo appointment locally.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("appointments")
+        )
+
+    # -----------------------------------------------------
+    # SUCCESS
+    # -----------------------------------------------------
+
+    flash(
+        "Practo appointment request submitted successfully!",
+        "success"
+    )
+
+    return redirect(
+        url_for("appointments")
     )
 
 
@@ -3292,44 +3575,394 @@ def appointments():
     methods=["POST"]
 )
 @login_required
-def cancel_appointment(
-    appointment_id
-):
+def cancel_appointment(appointment_id):
 
     appointment = (
         Appointment.query
         .filter_by(
-
             id=appointment_id,
-
             user_id=current_user.id
-
         )
         .first()
     )
 
     if not appointment:
+        flash("Appointment not found.")
+        return redirect(url_for("appointments"))
+
+    if appointment.status in ["Rejected", "Cancelled"]:
+        flash("This appointment has already been closed.")
+        return redirect(url_for("appointments"))
+
+    # -------------------------------------------------
+    # CANCEL ACCORDING TO APPOINTMENT PROVIDER
+    # -------------------------------------------------
+
+    provider = appointment.provider or "local"
+
+    if provider == "local":
+
+        appointment.status = "Cancelled"
+
+    elif provider == "practo":
+
+        if not appointment.external_booking_id:
+            flash("Practo booking ID is missing for this appointment.")
+            return redirect(url_for("appointments"))
+
+        try:
+            practo_service.cancel_appointment(
+                booking_id=appointment.external_booking_id
+            )
+
+        except PractoAPIError as e:
+            flash(str(e))
+            return redirect(url_for("appointments"))
+
+        appointment.status = "Cancelled"
+        appointment.external_status = "Cancelled"
+
+    else:
+
+        flash("Unknown appointment provider.")
+        return redirect(url_for("appointments"))
+
+    notification = Notification(
+        user_id=current_user.id,
+        title="Appointment Cancelled",
+        message=(
+            f"Your appointment with {appointment.doctor_name} on "
+            f"{appointment.appointment_date} at "
+            f"{appointment.appointment_time} has been cancelled."
+        ),
+        notification_type="appointment",
+        reminder_time=datetime.now()
+    )
+
+    db.session.add(notification)
+    db.session.commit()
+
+    flash("Appointment cancelled successfully.")
+    return redirect(url_for("appointments"))
+
+
+# =========================================================
+# DOCTOR LOGIN
+# =========================================================
+
+@app.route(
+    "/doctor-login",
+    methods=["GET", "POST"]
+)
+def doctor_login():
+
+    if request.method == "POST":
+
+        email = request.form.get(
+            "email",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        doctor = Doctor.query.filter_by(
+            email=email
+        ).first()
+
+        if (
+            doctor
+            and check_password_hash(
+                doctor.password,
+                password
+            )
+        ):
+            session["doctor_id"] = doctor.id
+
+            return redirect(
+                url_for("doctor_dashboard")
+            )
 
         flash(
-            "Appointment not found."
+            "Invalid doctor email or password."
         )
 
         return redirect(
-            url_for("appointments")
+            url_for("doctor_login")
         )
 
-    db.session.delete(
-        appointment
+    return render_template(
+        "doctor_login.html"
     )
 
-    db.session.commit()
 
-    flash(
-        "Appointment cancelled successfully."
+# =========================================================
+# DOCTOR LOGOUT
+# =========================================================
+
+@app.route("/doctor-logout")
+def doctor_logout():
+
+    session.pop(
+        "doctor_id",
+        None
     )
 
     return redirect(
-        url_for("appointments")
+        url_for("doctor_login")
+    )
+
+
+# =========================================================
+# DOCTOR DASHBOARD
+# =========================================================
+
+@app.route("/doctor-dashboard")
+def doctor_dashboard():
+
+    doctor_id = session.get(
+        "doctor_id"
+    )
+
+    if not doctor_id:
+        return redirect(
+            url_for("doctor_login")
+        )
+
+    doctor = Doctor.query.filter_by(
+        id=doctor_id
+    ).first()
+
+    if not doctor:
+        session.pop(
+            "doctor_id",
+            None
+        )
+
+        return redirect(
+            url_for("doctor_login")
+        )
+
+    appointments_list = (
+        Appointment.query
+        .filter_by(
+            doctor_id=doctor.id
+        )
+        .order_by(
+            Appointment.appointment_date.asc(),
+            Appointment.appointment_time.asc()
+        )
+        .all()
+    )
+
+    pending_count = (
+        Appointment.query
+        .filter_by(
+            doctor_id=doctor.id,
+            status="Pending"
+        )
+        .count()
+    )
+
+    confirmed_count = (
+        Appointment.query
+        .filter_by(
+            doctor_id=doctor.id,
+            status="Confirmed"
+        )
+        .count()
+    )
+
+    return render_template(
+        "doctor_dashboard.html",
+        doctor=doctor,
+        appointments=appointments_list,
+        pending_count=pending_count,
+        confirmed_count=confirmed_count
+    )
+
+
+# =========================================================
+# ACCEPT APPOINTMENT
+# =========================================================
+
+@app.route(
+    "/doctor/appointment/<int:appointment_id>/accept",
+    methods=["POST"]
+)
+def doctor_accept_appointment(appointment_id):
+
+    doctor_id = session.get(
+        "doctor_id"
+    )
+
+    if not doctor_id:
+        return redirect(
+            url_for("doctor_login")
+        )
+
+    appointment = (
+        Appointment.query
+        .filter_by(
+            id=appointment_id,
+            doctor_id=doctor_id
+        )
+        .first()
+    )
+
+    if not appointment:
+        flash("Appointment not found.")
+        return redirect(
+            url_for("doctor_dashboard")
+        )
+
+    if appointment.status != "Pending":
+        flash(
+            "This appointment has already been processed."
+        )
+        return redirect(
+            url_for("doctor_dashboard")
+        )
+
+    # -----------------------------------------------------
+    # FINAL DOUBLE-BOOKING CHECK
+    # -----------------------------------------------------
+
+    conflicting = (
+        Appointment.query
+        .filter(
+            Appointment.id != appointment.id,
+            Appointment.doctor_id == doctor_id,
+            Appointment.appointment_date == appointment.appointment_date,
+            Appointment.appointment_time == appointment.appointment_time,
+            Appointment.status == "Confirmed"
+        )
+        .first()
+    )
+
+    if conflicting:
+
+        appointment.status = "Rejected"
+
+        notification = Notification(
+            user_id=appointment.user_id,
+            title="Appointment Rejected",
+            message=(
+                f"Your appointment request with "
+                f"{appointment.doctor_name} on "
+                f"{appointment.appointment_date} at "
+                f"{appointment.appointment_time} could not be confirmed "
+                "because the time slot is no longer available."
+            ),
+            notification_type="appointment",
+            reminder_time=datetime.now()
+        )
+
+        db.session.add(notification)
+        db.session.commit()
+
+        flash(
+            "This time slot is already confirmed for another patient."
+        )
+
+        return redirect(
+            url_for("doctor_dashboard")
+        )
+
+    appointment.status = "Confirmed"
+
+    notification = Notification(
+        user_id=appointment.user_id,
+        title="Appointment Confirmed",
+        message=(
+            f"{appointment.doctor_name} has confirmed your appointment "
+            f"on {appointment.appointment_date} at "
+            f"{appointment.appointment_time}."
+        ),
+        notification_type="appointment",
+        reminder_time=datetime.now()
+    )
+
+    db.session.add(notification)
+    db.session.commit()
+
+    flash(
+        "Appointment confirmed successfully."
+    )
+
+    return redirect(
+        url_for("doctor_dashboard")
+    )
+
+
+# =========================================================
+# REJECT APPOINTMENT
+# =========================================================
+
+@app.route(
+    "/doctor/appointment/<int:appointment_id>/reject",
+    methods=["POST"]
+)
+def doctor_reject_appointment(appointment_id):
+
+    doctor_id = session.get(
+        "doctor_id"
+    )
+
+    if not doctor_id:
+        return redirect(
+            url_for("doctor_login")
+        )
+
+    appointment = (
+        Appointment.query
+        .filter_by(
+            id=appointment_id,
+            doctor_id=doctor_id
+        )
+        .first()
+    )
+
+    if not appointment:
+        flash("Appointment not found.")
+        return redirect(
+            url_for("doctor_dashboard")
+        )
+
+    if appointment.status != "Pending":
+        flash(
+            "This appointment has already been processed."
+        )
+        return redirect(
+            url_for("doctor_dashboard")
+        )
+
+    appointment.status = "Rejected"
+
+    notification = Notification(
+        user_id=appointment.user_id,
+        title="Appointment Rejected",
+        message=(
+            f"Your appointment request with "
+            f"{appointment.doctor_name} on "
+            f"{appointment.appointment_date} at "
+            f"{appointment.appointment_time} was rejected."
+        ),
+        notification_type="appointment",
+        reminder_time=datetime.now()
+    )
+
+    db.session.add(notification)
+    db.session.commit()
+
+    flash(
+        "Appointment rejected."
+    )
+
+    return redirect(
+        url_for("doctor_dashboard")
     )
 
 
@@ -3440,6 +4073,10 @@ def monthly_report():
 
     t, lang = get_t()
 
+    # -----------------------------------------------------
+    # GET ALL PREDICTION RECORDS
+    # -----------------------------------------------------
+
     predictions = (
         Prediction.query
         .filter_by(
@@ -3456,76 +4093,196 @@ def monthly_report():
     )
 
     # -----------------------------------------------------
-    # DEFAULTS
+    # DEFAULT VALUES
     # -----------------------------------------------------
 
     average_glucose = 0
     average_bmi = 0
+
     latest_risk = "No Data"
     latest_probability = 0
 
+    current_prediction = None
+    previous_prediction = None
+
+    # Progress values
+    glucose_change = None
+    bmi_change = None
+    hba1c_change = None
+    risk_change = None
+
+    risk_improvement = None
+
     # -----------------------------------------------------
-    # DATA
+    # CALCULATE REPORT DATA
     # -----------------------------------------------------
 
     if predictions:
 
+        # ---------------------------------------------
+        # AVERAGES
+        # ---------------------------------------------
+
         glucose_data = [
-
             p.glucose
-
             for p in predictions
-
             if p.glucose is not None
-
         ]
 
         bmi_data = [
-
             p.bmi
-
             for p in predictions
-
             if p.bmi is not None
-
         ]
 
         if glucose_data:
 
             average_glucose = round(
-
                 sum(glucose_data)
                 /
                 len(glucose_data),
-
                 2
-
             )
 
         if bmi_data:
 
             average_bmi = round(
-
                 sum(bmi_data)
                 /
                 len(bmi_data),
-
                 2
-
             )
 
-        latest_prediction = (
-            predictions[0]
-        )
+        # ---------------------------------------------
+        # CURRENT ASSESSMENT
+        # ---------------------------------------------
+
+        current_prediction = predictions[0]
 
         latest_risk = (
-            latest_prediction.risk_tier
+            current_prediction.risk_tier
         )
 
         latest_probability = float(
-            latest_prediction.probability
+            current_prediction.probability
             or 0
         )
+
+        # ---------------------------------------------
+        # PREVIOUS ASSESSMENT
+        # ---------------------------------------------
+
+        if len(predictions) > 1:
+
+            previous_prediction = predictions[1]
+
+            # -----------------------------------------
+            # GLUCOSE CHANGE
+            # -----------------------------------------
+
+            if (
+                current_prediction.glucose is not None
+                and previous_prediction.glucose is not None
+            ):
+
+                glucose_change = round(
+                    current_prediction.glucose
+                    -
+                    previous_prediction.glucose,
+                    2
+                )
+
+            # -----------------------------------------
+            # BMI CHANGE
+            # -----------------------------------------
+
+            if (
+                current_prediction.bmi is not None
+                and previous_prediction.bmi is not None
+            ):
+
+                bmi_change = round(
+                    current_prediction.bmi
+                    -
+                    previous_prediction.bmi,
+                    2
+                )
+
+            # -----------------------------------------
+            # HbA1c CHANGE
+            # -----------------------------------------
+
+            if (
+                current_prediction.hbA1c_level is not None
+                and previous_prediction.hbA1c_level is not None
+            ):
+
+                hba1c_change = round(
+                    current_prediction.hbA1c_level
+                    -
+                    previous_prediction.hbA1c_level,
+                    2
+                )
+
+            # -----------------------------------------
+            # RISK PROBABILITY CHANGE
+            # -----------------------------------------
+
+            if (
+                current_prediction.probability is not None
+                and previous_prediction.probability is not None
+            ):
+
+                risk_change = round(
+                    current_prediction.probability
+                    -
+                    previous_prediction.probability,
+                    2
+                )
+
+                # Positive value means risk probability
+                # has decreased from previous to current.
+                risk_improvement = round(
+                    previous_prediction.probability
+                    -
+                    current_prediction.probability,
+                    2
+                )
+
+    # -----------------------------------------------------
+    # MEDICATION RECORDS
+    # -----------------------------------------------------
+
+    medications = (
+        Medication.query
+        .filter_by(
+            user_id=current_user.id
+        )
+        .order_by(
+            Medication.time.asc()
+        )
+        .all()
+    )
+
+    # -----------------------------------------------------
+    # APPOINTMENT RECORDS
+    # -----------------------------------------------------
+
+    appointments = (
+        Appointment.query
+        .filter_by(
+            user_id=current_user.id
+        )
+        .order_by(
+            Appointment.appointment_date.asc(),
+            Appointment.appointment_time.asc()
+        )
+        .all()
+    )
+
+    # -----------------------------------------------------
+    # RENDER REPORT
+    # -----------------------------------------------------
 
     return render_template(
 
@@ -3535,27 +4292,39 @@ def monthly_report():
 
         current_lang=lang,
 
-        predictions=
-            predictions,
+        patient=current_user,
 
-        total_predictions=
-            total_predictions,
+        predictions=predictions,
 
-        average_glucose=
-            average_glucose,
+        total_predictions=total_predictions,
 
-        average_bmi=
-            average_bmi,
+        average_glucose=average_glucose,
 
-        latest_risk=
-            latest_risk,
+        average_bmi=average_bmi,
 
-        latest_probability=
-            latest_probability
+        latest_risk=latest_risk,
+
+        latest_probability=latest_probability,
+
+        current_prediction=current_prediction,
+
+        previous_prediction=previous_prediction,
+
+        glucose_change=glucose_change,
+
+        bmi_change=bmi_change,
+
+        hba1c_change=hba1c_change,
+
+        risk_change=risk_change,
+
+        risk_improvement=risk_improvement,
+
+        medications=medications,
+
+        appointments=appointments
 
     )
-
-
 # =========================================================
 # ERROR HANDLERS
 # =========================================================

@@ -1,314 +1,185 @@
 <!DOCTYPE html>
-<html lang="{{ session.get('language', 'en') }}">
+<html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>
-        {{ t.appointments_title if t.appointments_title is defined else "Appointments - Diabetes Care" }}
-    </title>
+    <title>Appointments - Diabetes Care</title>
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+        rel="stylesheet"
+    >
 
     <style>
 
         body {
-            margin: 0;
-            background: #f4faf7;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #17352d;
+            background: #f5f8f7;
+            font-family: Arial, sans-serif;
         }
 
-        .app-layout {
-            display: flex;
-            min-height: 100vh;
+        .page-container {
+            max-width: 1100px;
+            margin: 40px auto;
         }
 
-        /* ================= SIDEBAR ================= */
-
-        .sidebar {
-            width: 270px;
-            min-height: 100vh;
-            background: #f7fcfa;
-            border-right: 1px solid #dcebe5;
-            padding: 22px 16px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            overflow-y: auto;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 5px 12px 25px;
-        }
-
-        .brand-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #009b79, #d4bd32);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .brand-name {
-            font-size: 21px;
-            font-weight: 700;
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 11px 13px;
-            border-radius: 25px;
-            color: #17352d;
-            text-decoration: none;
-            font-size: 15px;
-            transition: 0.2s;
-        }
-
-        .nav-item:hover {
-            background: #e5f3ee;
-            color: #008f70;
-        }
-
-        .nav-item.active {
-            background: #009b79;
-            color: white;
-        }
-
-        .nav-icon {
-            width: 22px;
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .sidebar-bottom {
-            margin-top: 25px;
-            border-top: 1px solid #dcebe5;
-            padding-top: 18px;
-        }
-
-        .language-select {
-            width: 100%;
-            border: 1px solid #d6e6e0;
-            border-radius: 25px;
+        .main-card {
             background: white;
-            padding: 10px 14px;
-            color: #17352d;
-            margin-bottom: 12px;
-        }
-
-        .signout {
-            display: block;
-            padding: 10px 13px;
-            color: #526a62;
-            text-decoration: none;
-        }
-
-        .signout:hover {
-            color: #c62828;
-        }
-
-        /* ================= MAIN ================= */
-
-        .main-content {
-            margin-left: 270px;
-            width: calc(100% - 270px);
-            min-height: 100vh;
-        }
-
-        .top-header {
-            padding: 28px 32px;
-            border-bottom: 1px solid #dcebe5;
-            background: #f7fcfa;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
         }
 
         .page-title {
-            font-size: 31px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .page-subtitle {
-            color: #71847d;
-            margin-top: 5px;
-            margin-bottom: 0;
-        }
-
-        .content-area {
-            padding: 30px;
-            max-width: 1100px;
-        }
-
-        /* ================= CARD ================= */
-
-        .card-custom {
-            background: white;
-            border: 1px solid #d8e9e2;
-            border-radius: 22px;
-            padding: 30px;
-            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
-            margin-bottom: 25px;
-        }
-
-        .card-title {
-            font-size: 21px;
-            font-weight: 700;
-            margin-bottom: 22px;
-        }
-
-        /* ================= FORM ================= */
-
-        .form-label {
-            font-weight: 600;
-            color: #36574d;
+            color: #198754;
+            font-weight: bold;
         }
 
         .form-control,
         .form-select {
-            border: 1px solid #cfe3db;
-            border-radius: 12px;
-            padding: 12px;
+            border-radius: 10px;
+            padding: 11px;
         }
 
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #009b79;
-            box-shadow: 0 0 0 3px rgba(0, 155, 121, 0.1);
-        }
-
-        .book-btn {
-            width: 100%;
-            border: none;
-            border-radius: 25px;
-            padding: 13px;
+        .btn-book {
+            background: #198754;
             color: white;
-            font-size: 16px;
-            font-weight: 700;
-            background: linear-gradient(
-                90deg,
-                #009b79,
-                #35ad6d,
-                #d5bc32
-            );
-            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: bold;
         }
 
-        .book-btn:hover {
-            opacity: 0.9;
+        .btn-book:hover {
+            background: #157347;
+            color: white;
         }
-
-        /* ================= APPOINTMENT ================= */
 
         .appointment-card {
-            border: 1px solid #dcebe5;
-            border-radius: 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 14px;
             padding: 20px;
-            margin-bottom: 15px;
-            background: #f8fcfa;
+            margin-top: 15px;
+            background: white;
         }
 
-        .appointment-doctor {
-            font-size: 18px;
-            font-weight: 700;
-            color: #008b6d;
-            margin-bottom: 8px;
+        .status {
+            display: inline-block;
+            padding: 6px 13px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
         }
 
-        .appointment-info {
-            color: #526a62;
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .confirmed {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .rejected {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .cancelled {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+        .section-title {
+            margin-top: 35px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .doctor-info {
+            background: #f0f8f4;
+            border-left: 4px solid #198754;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 12px;
+        }
+
+        .doctor-info strong {
+            color: #198754;
+        }
+
+        /* =====================================================
+           PRACTO SECTION
+        ===================================================== */
+
+        .practo-card {
+            background: linear-gradient(
+                135deg,
+                #eefaf4,
+                #f8fffb
+            );
+
+            border: 1px solid #ccebd9;
+
+            border-radius: 15px;
+
+            padding: 20px;
+
+            margin-top: 25px;
+        }
+
+        .practo-title {
+            color: #198754;
+            font-weight: bold;
+        }
+
+        .practo-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .practo-ready {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .practo-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .provider-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
             margin-top: 8px;
         }
 
-        .cancel-btn {
-            border: none;
-            background: #fde8e8;
-            color: #c62828;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-weight: 600;
-            cursor: pointer;
+        .local-provider {
+            background: #e7f1ff;
+            color: #084298;
         }
 
-        .cancel-btn:hover {
-            background: #c62828;
-            color: white;
+        .practo-provider {
+            background: #d1e7dd;
+            color: #0f5132;
         }
 
-        .empty-message {
-            text-align: center;
-            padding: 30px;
-            color: #71847d;
-        }
-
-        /* ================= FLASH ================= */
-
-        .flash-message {
-            background: #e6f5ef;
-            color: #087e65;
-            border: 1px solid #cce9df;
-            border-radius: 12px;
-            padding: 13px 16px;
-            margin-bottom: 20px;
-        }
-
-        /* ================= MOBILE ================= */
-
-        @media (max-width: 700px) {
-
-            .sidebar {
-                position: relative;
-                width: 100%;
-                min-height: auto;
-                height: auto;
-            }
-
-            .app-layout {
-                flex-direction: column;
-            }
-
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .content-area {
-                padding: 18px;
-            }
-
-            .top-header {
-                padding: 22px 18px;
-            }
-
-            .page-title {
-                font-size: 26px;
-            }
-
-            .card-custom {
-                padding: 20px;
-            }
-
+        .practo-booking-card {
+            border-radius: 15px;
+            overflow: hidden;
         }
 
     </style>
@@ -319,836 +190,805 @@
 <body>
 
 
-<div class="app-layout">
+<div class="container page-container">
 
 
-    <!-- ================= SIDEBAR ================= -->
+    <div class="main-card">
 
-    <aside class="sidebar">
 
+        <!-- =====================================================
+             PAGE TITLE
+        ===================================================== -->
 
-        <!-- BRAND -->
+        <h2 class="page-title">
 
-        <div class="brand">
+            🩺 Book a Doctor Appointment
 
-            <div class="brand-icon">
-                ♡
-            </div>
+        </h2>
 
-            <div class="brand-name">
-                {{ t.brand_name }}
-            </div>
 
-        </div>
+        <p class="text-muted">
 
+            Select a doctor, choose your preferred date and time,
+            and send an appointment request.
 
-        <!-- NAVIGATION -->
+        </p>
 
-        <nav class="nav-menu">
 
+        <!-- =====================================================
+             FLASH MESSAGES
+        ===================================================== -->
 
-            <!-- DASHBOARD -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
-            <a
-                href="{{ url_for('dashboard') }}"
-                class="nav-item">
+            {% if messages %}
 
-                <span class="nav-icon">
-                    ⌂
-                </span>
+                {% for category, message in messages %}
 
-                {{ t.nav_dashboard }}
+                    <div
+                        class="alert alert-{{ category }} alert-dismissible fade show"
+                    >
 
-            </a>
+                        {{ message }}
 
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                        ></button>
 
-            <!-- PATIENT DATA -->
+                    </div>
 
-            <a
-                href="{{ url_for('home') }}"
-                class="nav-item">
+                {% endfor %}
 
-                <span class="nav-icon">
-                    ♙
-                </span>
+            {% endif %}
 
-                {{ t.nav_patient_data }}
+        {% endwith %}
 
-            </a>
 
+        <!-- =====================================================
+             PRACTO INTEGRATION STATUS
+        ===================================================== -->
 
-            <!-- GLUCOSE -->
+        <div class="practo-card">
 
-            <a
-                href="{{ url_for('dashboard') }}"
-                class="nav-item">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
 
-                <span class="nav-icon">
-                    ⌁
-                </span>
+                <div>
 
-                {{ t.nav_glucose }}
+                    <h5 class="practo-title mb-1">
 
-            </a>
+                        🌐 Practo Integration
 
+                    </h5>
 
-            <!-- MEALS -->
+                    <p class="text-muted mb-2">
 
-            <a
-                href="{{ url_for('meal_plan', risk_tier=risk_tier) }}"
-                class="nav-item">
+                        External doctor and hospital booking integration.
 
-                <span class="nav-icon">
-                    ♡
-                </span>
+                    </p>
 
-                {{ t.nav_meals }}
+                </div>
 
-            </a>
 
+                {% if practo_configured %}
 
-            <!-- MEDICATION -->
+                    <span class="practo-badge practo-ready">
 
-            <a
-                href="{{ url_for('medication') }}"
-                class="nav-item">
+                        ● API Connected
 
-                <span class="nav-icon">
-                    ◈
-                </span>
+                    </span>
 
-                {{ t.nav_medication }}
+                {% else %}
 
-            </a>
+                    <span class="practo-badge practo-pending">
 
+                        ● Waiting for API Access
 
-            <!-- APPOINTMENTS -->
-
-            <a
-                href="{{ url_for('appointments') }}"
-                class="nav-item active">
-
-                <span class="nav-icon">
-                    □
-                </span>
-
-                {{ t.nav_appointments }}
-
-            </a>
-
-
-            <!-- NEARBY HOSPITALS -->
-
-            <a
-                href="{{ url_for('doctor_locator') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⌖
-                </span>
-
-                {{ t.nav_hospitals }}
-
-            </a>
-
-
-            <!-- EXERCISE -->
-
-            <a
-                href="{{ url_for('exercise_videos', risk_tier=risk_tier) }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ♧
-                </span>
-
-                {{ t.nav_exercise }}
-
-            </a>
-
-
-            <!-- PROGRESS -->
-
-            <a
-                href="{{ url_for('progress') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⌁
-                </span>
-
-                {{ t.nav_progress }}
-
-            </a>
-
-
-            <!-- RECORDS -->
-
-            <a
-                href="{{ url_for('download_report') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ▤
-                </span>
-
-                {{ t.nav_records }}
-
-            </a>
-
-
-            <!-- BMI -->
-
-            <a
-                href="{{ url_for('bmi_calculator') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⚖
-                </span>
-
-                {{ t.nav_bmi }}
-
-            </a>
-
-
-            <!-- MONTHLY REPORT -->
-
-            <a
-                href="{{ url_for('monthly_report') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ▧
-                </span>
-
-                {{ t.nav_monthly_report }}
-
-            </a>
-
-
-        </nav>
-
-
-        <!-- ================= LANGUAGE ================= -->
-
-        <div class="sidebar-bottom">
-
-
-            <select
-                class="language-select"
-                onchange="changeLanguage(this.value)">
-
-
-                <option
-                    value="en"
-                    {% if session.get('language', 'en') == 'en' %}
-                    selected
-                    {% endif %}>
-
-                    English
-
-                </option>
-
-
-                <option
-                    value="hi"
-                    {% if session.get('language', 'en') == 'hi' %}
-                    selected
-                    {% endif %}>
-
-                    हिन्दी
-
-                </option>
-
-
-                <option
-                    value="kn"
-                    {% if session.get('language', 'en') == 'kn' %}
-                    selected
-                    {% endif %}>
-
-                    ಕನ್ನಡ
-
-                </option>
-
-
-            </select>
-
-
-            <!-- SIGN OUT -->
-
-            <a
-                href="{{ url_for('logout') }}"
-                class="signout">
-
-                ⇥ &nbsp; {{ t.nav_signout }}
-
-            </a>
-
-
-        </div>
-
-
-    </aside>
-
-
-    <!-- ================= MAIN CONTENT ================= -->
-
-    <main class="main-content">
-
-
-        <!-- HEADER -->
-
-        <header class="top-header">
-
-            <h1 class="page-title">
-
-                📅 {{ t.nav_appointments }}
-
-            </h1>
-
-            <p class="page-subtitle">
-
-                {{ t.appointments_subtitle }}
-
-            </p>
-
-        </header>
-
-
-        <div class="content-area">
-
-
-            <!-- ================= FLASH MESSAGE ================= -->
-
-            {% with messages = get_flashed_messages() %}
-
-                {% if messages %}
-
-                    {% for message in messages %}
-
-                        <div class="flash-message">
-
-                            ✓ {{ message }}
-
-                        </div>
-
-                    {% endfor %}
+                    </span>
 
                 {% endif %}
 
-            {% endwith %}
+            </div>
 
 
-            <!-- ================= BOOK APPOINTMENT ================= -->
+            {% if practo_configured %}
 
-            <div class="card-custom">
+                <div class="alert alert-success mt-3 mb-0">
+
+                    <strong>Practo API configured.</strong>
+
+                    Practo booking can be used after the official
+                    provider endpoints and permissions are available.
+
+                </div>
+
+            {% else %}
+
+                <div class="alert alert-warning mt-3 mb-0">
+
+                    <strong>Practo API is not configured yet.</strong>
+
+                    Your existing Diabetes Care doctor appointment
+                    system continues to work normally.
+
+                    Practo booking will be enabled after official
+                    Practo Partner API access and credentials are received.
+
+                </div>
+
+            {% endif %}
+
+        </div>
 
 
-                <h2 class="card-title">
+        <!-- =====================================================
+             LOCAL DIABETES CARE APPOINTMENT FORM
+        ===================================================== -->
 
-                    {{ t.book_new_appointment }}
+        <form
+            method="POST"
+            class="mt-4"
+        >
 
-                </h2>
+            <!-- DOCTOR -->
+
+            <div class="mb-3">
+
+                <label class="form-label fw-bold">
+
+                    Select Doctor
+
+                </label>
 
 
-                <form
-                    action="{{ url_for('appointments') }}"
-                    method="POST">
+                <select
+                    name="doctor_id"
+                    class="form-select"
+                    required
+                >
+
+                    <option value="">
+
+                        -- Select a Doctor --
+
+                    </option>
 
 
-                    <div class="row">
+                    {% for doctor in doctors %}
+
+                        <option value="{{ doctor.id }}">
+
+                           {{ doctor.name }}
+
+                            {% if doctor.specialization %}
+
+                                - {{ doctor.specialization }}
+
+                            {% endif %}
+
+                            {% if doctor.hospital %}
+
+                                ({{ doctor.hospital }})
+
+                            {% endif %}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
 
 
-                        <!-- DOCTOR -->
+                <div class="form-text">
 
-                        <div class="col-md-6 mb-3">
+                    🏥 These are doctors currently available
+                    through your Diabetes Care system.
 
-                            <label
-                                class="form-label"
-                                for="doctor">
+                </div>
 
-                                {{ t.doctor }}
+            </div>
+
+
+            <!-- SELECTED DOCTOR INFORMATION -->
+
+            <div class="doctor-info">
+
+                <strong>Appointment Information</strong>
+
+                <div class="mt-2 text-muted">
+
+                    Your request will be sent to the selected
+                    Diabetes Care doctor.
+
+                    The doctor can then confirm or reject
+                    the appointment.
+
+                </div>
+
+            </div>
+
+
+            <!-- DATE AND TIME -->
+
+            <div class="row mt-3">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold">
+
+                        Appointment Date
+
+                    </label>
+
+                    <input
+                        type="date"
+                        name="appointment_date"
+                        class="form-control"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label fw-bold">
+
+                        Appointment Time
+
+                    </label>
+
+                    <input
+                        type="time"
+                        name="appointment_time"
+                        class="form-control"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- PURPOSE -->
+
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+
+                    Reason for Appointment
+
+                </label>
+
+
+                <textarea
+                    name="reason"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Enter the reason for your appointment..."
+                ></textarea>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                type="submit"
+                class="btn btn-book"
+            >
+
+                📅 Send Appointment Request
+
+            </button>
+
+
+        </form>
+
+
+        <!-- =====================================================
+             PRACTO APPOINTMENT BOOKING
+        ===================================================== -->
+
+        {% if practo_configured %}
+
+            <div class="card shadow-sm border-0 mt-4 practo-booking-card">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+
+                        🌐 Book Appointment through Practo
+
+                    </h5>
+
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="alert alert-info">
+
+                        <strong>External booking notice:</strong>
+
+                        Your name, email and appointment information
+                        will be sent to Practo only after you provide
+                        consent.
+
+                    </div>
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('practo_book_appointment') }}"
+                    >
+
+
+                        <!-- PRACTO PROVIDER ID -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+
+                                Practo Doctor / Provider ID
 
                             </label>
 
 
-                            <select
-                                class="form-select"
-                                id="doctor"
-                                name="doctor"
-                                required>
-
-
-                                <option value="">
-
-                                    {{ t.select_doctor }}
-
-                                </option>
-
-
-                                <option value="Dr. Priya Sharma">
-
-                                    Dr. Priya Sharma - Diabetologist
-
-                                </option>
-
-
-                                <option value="Dr. Rahul Kumar">
-
-                                    Dr. Rahul Kumar - Endocrinologist
-
-                                </option>
-
-
-                                <option value="Dr. Ananya Rao">
-
-                                    Dr. Ananya Rao - General Physician
-
-                                </option>
-
-
-                                <option value="Dr. Sneha Patel">
-
-                                    Dr. Sneha Patel - Diabetes Specialist
-
-                                </option>
-
-
-                            </select>
+                            <input
+                                type="text"
+                                name="provider_id"
+                                class="form-control"
+                                placeholder="Enter Practo provider ID"
+                                required
+                            >
 
                         </div>
 
 
                         <!-- DATE -->
 
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3">
 
-                            <label
-                                class="form-label"
-                                for="appointment_date">
+                            <label class="form-label">
 
-                                {{ t.appointment_date }}
+                                Appointment Date
 
                             </label>
 
 
                             <input
                                 type="date"
-                                class="form-control"
-                                id="appointment_date"
                                 name="appointment_date"
-                                required>
-
-                        </div>
-
-
-                        <!-- HOSPITAL -->
-
-                        <div class="col-md-6 mb-3">
-
-                            <label
-                                class="form-label"
-                                for="hospital">
-
-                                🏥 Hospital
-
-                            </label>
-
-
-                            <input
-                                type="text"
                                 class="form-control"
-                                id="hospital"
-                                name="hospital"
-                                placeholder="Enter hospital name"
-                                required>
+                                required
+                            >
 
                         </div>
 
 
                         <!-- TIME -->
 
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3">
 
-                            <label
-                                class="form-label"
-                                for="appointment_time">
+                            <label class="form-label">
 
-                                {{ t.appointment_time }}
+                                Appointment Time
 
                             </label>
 
 
                             <input
                                 type="time"
-                                class="form-control"
-                                id="appointment_time"
                                 name="appointment_time"
-                                required>
+                                class="form-control"
+                                required
+                            >
 
                         </div>
 
 
-                        <!-- REASON / PURPOSE -->
+                        <!-- PURPOSE -->
 
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3">
 
-                            <label
-                                class="form-label"
-                                for="reason">
+                            <label class="form-label">
 
-                                {{ t.reason }}
+                                Purpose / Reason
 
                             </label>
 
 
-                            <input
-                                type="text"
+                            <textarea
+                                name="purpose"
                                 class="form-control"
-                                id="reason"
-                                name="reason"
-                                placeholder="{{ t.reason_placeholder }}">
+                                rows="3"
+                                placeholder="Enter reason for appointment"
+                            ></textarea>
 
                         </div>
 
 
-                    </div>
+                        <!-- CONSENT -->
+
+                        <div class="form-check mb-3">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="practo_consent"
+                                value="yes"
+                                id="practoConsent"
+                                required
+                            >
 
 
-                    <!-- BOOK BUTTON -->
+                            <label
+                                class="form-check-label"
+                                for="practoConsent"
+                            >
 
-                    <div class="mt-3">
+                                I consent to sharing the information
+                                required for appointment booking with
+                                Practo.
+
+                            </label>
+
+                        </div>
+
+
+                        <!-- BOOK -->
 
                         <button
                             type="submit"
-                            class="book-btn">
+                            class="btn btn-primary"
+                        >
 
-                            📅 {{ t.book_now }}
+                            📅 Book through Practo
 
                         </button>
 
-                    </div>
 
+                    </form>
 
-                </form>
-
+                </div>
 
             </div>
 
+        {% else %}
 
-            <!-- ================= MY APPOINTMENTS ================= -->
+            <div class="card shadow-sm border-0 mt-4">
 
-            <div class="card-custom">
+                <div class="card-body">
 
+                    <h5>
 
-                <h2 class="card-title">
+                        🌐 Practo Integration
 
-                    {{ t.my_appointments }}
+                    </h5>
 
-                </h2>
 
+                    <p class="text-muted mb-0">
 
-                {% if appointments %}
+                        Practo booking is currently waiting for official
+                        Practo Partner API access and credentials.
 
+                    </p>
 
-                    {% for appointment in appointments %}
+                </div>
 
+            </div>
 
-                        <div class="appointment-card">
+        {% endif %}
 
 
-                            <div class="row align-items-center">
+        <!-- =====================================================
+             MY APPOINTMENTS
+        ===================================================== -->
 
+        <h4 class="section-title">
 
-                                <!-- APPOINTMENT INFORMATION -->
+            📋 My Appointments
 
-                                <div class="col-md-8">
+        </h4>
 
 
-                                    <!-- DOCTOR -->
+        {% if appointments %}
 
-                                    <div class="appointment-doctor">
 
-                                        👨‍⚕️
+            {% for appointment in appointments %}
 
-                                        {{ appointment.doctor_name }}
 
-                                    </div>
+                <div class="appointment-card">
 
 
-                                    <!-- HOSPITAL -->
+                    <div class="row align-items-center">
 
-                                    {% if appointment.hospital %}
 
-                                        <div class="appointment-info">
+                        <!-- DOCTOR -->
 
-                                            🏥
+                        <div class="col-md-4">
 
-                                            <strong>
-                                                Hospital:
-                                            </strong>
+                            <h5 class="mb-1">
 
-                                            {{ appointment.hospital }}
+                                {{ appointment.doctor_name }}
 
-                                        </div>
+                            </h5>
 
-                                    {% endif %}
 
+                            <div class="text-muted">
 
-                                    <!-- DATE -->
-
-                                    <div class="appointment-info">
-
-                                        📅
-
-                                        <strong>
-                                            {{ t.date_label }}
-                                        </strong>
-
-                                        {{ appointment.appointment_date }}
-
-                                    </div>
-
-
-                                    <!-- TIME -->
-
-                                    <div class="appointment-info">
-
-                                        🕐
-
-                                        <strong>
-                                            {{ t.time_label }}
-                                        </strong>
-
-                                        {{ appointment.appointment_time }}
-
-                                    </div>
-
-
-                                    <!-- PURPOSE -->
-
-                                    {% if appointment.purpose %}
-
-                                        <div class="appointment-info">
-
-                                            📝
-
-                                            <strong>
-                                                {{ t.reason_label }}
-                                            </strong>
-
-                                            {{ appointment.purpose }}
-
-                                        </div>
-
-                                    {% endif %}
-
-
-                                    <!-- PATIENT -->
-
-                                    {% if appointment.user %}
-
-                                        <div class="appointment-info">
-
-                                            👤
-
-                                            <strong>
-                                                Patient:
-                                            </strong>
-
-                                            {{ appointment.user.name }}
-
-                                        </div>
-
-                                    {% endif %}
-
-
-                                </div>
-
-
-                                <!-- CANCEL BUTTON -->
-
-                                <div
-                                    class="col-md-4 text-md-end mt-3 mt-md-0">
-
-
-                                    <form
-                                        action="{{ url_for(
-                                            'cancel_appointment',
-                                            appointment_id=appointment.id
-                                        ) }}"
-                                        method="POST">
-
-
-                                        <button
-                                            type="submit"
-                                            class="cancel-btn"
-                                            onclick="return confirm('{{ t.confirm_cancel }}');">
-
-                                            {{ t.cancel }}
-
-                                        </button>
-
-
-                                    </form>
-
-
-                                </div>
-
+                                🏥 {{ appointment.hospital }}
 
                             </div>
 
 
+                            <!-- PROVIDER -->
+
+                            {% if appointment.provider == "practo" %}
+
+                                <span class="provider-badge practo-provider">
+
+                                    🌐 Practo
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="provider-badge local-provider">
+
+                                    🏥 Diabetes Care
+
+                                </span>
+
+                            {% endif %}
+
                         </div>
 
 
-                    {% endfor %}
+                        <!-- DATE AND TIME -->
+
+                        <div class="col-md-3">
+
+                            <div>
+
+                                📅
+
+                                <strong>
+
+                                    {{ appointment.appointment_date }}
+
+                                </strong>
+
+                            </div>
 
 
-                {% else %}
+                            <div>
 
+                                🕐
 
-                    <!-- NO APPOINTMENTS -->
+                                <strong>
 
-                    <div class="empty-message">
+                                    {{ appointment.appointment_time }}
 
+                                </strong>
 
-                        <div style="font-size: 40px;">
-                            📅
+                            </div>
+
                         </div>
 
 
-                        <p>
+                        <!-- STATUS -->
 
-                            {{ t.no_appointments }}
+                        <div class="col-md-3">
 
-                        </p>
+                            {% if appointment.status == 'Pending' %}
+
+                                <span class="status pending">
+
+                                    Pending
+
+                                </span>
+
+                            {% elif appointment.status == 'Confirmed' %}
+
+                                <span class="status confirmed">
+
+                                    Confirmed
+
+                                </span>
+
+                            {% elif appointment.status == 'Rejected' %}
+
+                                <span class="status rejected">
+
+                                    Rejected
+
+                                </span>
+
+                            {% elif appointment.status == 'Cancelled' %}
+
+                                <span class="status cancelled">
+
+                                    Cancelled
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="status">
+
+                                    {{ appointment.status }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
 
 
-                        <p>
+                        <!-- CANCEL -->
 
-                            {{ t.book_first_appointment }}
+                        <div class="col-md-2 text-md-end mt-3 mt-md-0">
 
-                        </p>
+                            {% if appointment.status == 'Pending'
+                                  or appointment.status == 'Confirmed' %}
 
+                                <form
+                                    method="POST"
+                                    action="{{ url_for(
+                                        'cancel_appointment',
+                                        appointment_id=appointment.id
+                                    ) }}"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-outline-danger btn-sm"
+                                        onclick="return confirm('Cancel this appointment?');"
+                                    >
+
+                                        Cancel
+
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </div>
 
                     </div>
 
 
-                {% endif %}
+                    <!-- PURPOSE -->
 
+                    {% if appointment.purpose %}
+
+                        <div class="mt-3 pt-3 border-top">
+
+                            <strong>
+
+                                Reason:
+
+                            </strong>
+
+                            {{ appointment.purpose }}
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- EXTERNAL BOOKING INFORMATION -->
+
+                    {% if appointment.external_booking_id %}
+
+                        <div class="mt-3 pt-3 border-top">
+
+                            <strong>
+
+                                External Booking ID:
+
+                            </strong>
+
+                            <span class="text-muted">
+
+                                {{ appointment.external_booking_id }}
+
+                            </span>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    {% if appointment.external_status %}
+
+                        <div class="mt-2">
+
+                            <strong>
+
+                                External Status:
+
+                            </strong>
+
+                            <span class="text-muted">
+
+                                {{ appointment.external_status }}
+
+                            </span>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- CONSENT INFORMATION -->
+
+                    {% if appointment.provider == "practo"
+                          and appointment.practo_consent %}
+
+                        <div class="mt-2">
+
+                            <small class="text-muted">
+
+                                ✓ Consent provided for external booking
+
+                                {% if appointment.practo_consent_at %}
+
+                                    on
+                                    {{ appointment.practo_consent_at.strftime('%Y-%m-%d %H:%M') }}
+
+                                {% endif %}
+
+                            </small>
+
+                        </div>
+
+                    {% endif %}
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <div class="text-center text-muted py-4">
+
+                <div style="font-size: 40px;">
+
+                    📅
+
+                </div>
+
+
+                <p class="mt-2 mb-0">
+
+                    You don't have any appointments yet.
+
+                </p>
 
             </div>
 
 
-        </div>
+        {% endif %}
 
 
-    </main>
+    </div>
 
 
 </div>
 
 
-<!-- ================= LANGUAGE SCRIPT ================= -->
-
-<script>
-
-function changeLanguage(language) {
-
-    window.location.href =
-        "/set-language/" + language;
-
-}
-
-</script>
-
-
-<!-- ================= BOOTSTRAP ================= -->
-
 <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
-</script>
-
-
-<!-- ================= DATE/TIME VALIDATION ================= -->
-
-<script>
-
-const dateInput =
-    document.getElementById("appointment_date");
-
-
-if (dateInput) {
-
-    const today =
-        new Date().toISOString().split("T")[0];
-
-    dateInput.min = today;
-
-}
-
-
-const timeInput =
-    document.getElementById("appointment_time");
-
-
-if (timeInput) {
-
-
-    function updateTimeLimit() {
-
-
-        const today =
-            new Date().toISOString().split("T")[0];
-
-
-        if (dateInput.value === today) {
-
-
-            const now =
-                new Date();
-
-
-            let hours =
-                now.getHours()
-                .toString()
-                .padStart(2, "0");
-
-
-            let minutes =
-                now.getMinutes()
-                .toString()
-                .padStart(2, "0");
-
-
-            timeInput.min =
-                hours + ":" + minutes;
-
-
-        } else {
-
-
-            timeInput.removeAttribute("min");
-
-        }
-
-    }
-
-
-    dateInput.addEventListener(
-        "change",
-        updateTimeLimit
-    );
-
-
-    updateTimeLimit();
-
-}
-
-</script>
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+></script>
 
 
 </body>

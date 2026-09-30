@@ -1,61 +1,923 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>{{ t.chatbot_title }}</title>
-</head>
-<body>
-    <h1>{{ t.chatbot_title }}</h1>
-    <p><a href="/">{{ t.back_to_form }}</a> | <a href="/dashboard">{{ t.dashboard_link }}</a> | <a href="/logout">{{ t.logout }}</a></p>
 
-    <form action="/chatbot" method="POST">
-        <label>{{ t.chatbot_placeholder }}</label><br>
-        <input type="text" name="message" id="messageInput" style="width:400px;" required>
-        <button type="button" id="micButton" onclick="startListening()">🎤</button>
-        <button type="submit">{{ t.ask_button }}</button>
-    </form>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
-    <p id="micStatus" style="color: gray;"></p>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    {% if reply %}
-        <br>
-        <p><strong>{{ t.you_asked }}:</strong> {{ user_message }}</p>
-        <p><strong>{{ t.assistant }} ({{ mode }} mode):</strong> {{ reply }}</p>
-    {% endif %}
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4faf7;
+        }
 
-    <script>
-        function startListening() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        .chat-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-            if (!SpeechRecognition) {
-                document.getElementById('micStatus').innerText = "Voice input not supported in this browser. Try Chrome.";
-                return;
+        /* ---------------- HEADER ---------------- */
+
+        .chat-header {
+            background: linear-gradient(
+                135deg,
+                #009879,
+                #22a96f,
+                #78bd58
+            );
+
+            color: white;
+            padding: 18px 30px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 45px;
+            height: 45px;
+
+            border-radius: 50%;
+
+            background: rgba(255,255,255,0.18);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 23px;
+        }
+
+        .brand-title {
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-links a {
+            color: white;
+            text-decoration: none;
+
+            padding: 8px 14px;
+
+            border-radius: 20px;
+
+            background: rgba(255,255,255,0.14);
+
+            font-size: 14px;
+        }
+
+        .header-links a:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* ---------------- CHAT CONTAINER ---------------- */
+
+        .chat-wrapper {
+            width: 100%;
+            max-width: 900px;
+
+            margin: 35px auto;
+
+            padding: 0 20px;
+
+            flex: 1;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-card {
+            background: white;
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 12px 35px rgba(20, 80, 60, 0.10);
+
+            border: 1px solid #dcece6;
+
+            overflow: hidden;
+
+            display: flex;
+            flex-direction: column;
+
+            min-height: 650px;
+        }
+
+        /* ---------------- CHAT TOP ---------------- */
+
+        .chat-title-area {
+            padding: 22px 25px;
+
+            border-bottom: 1px solid #e5eee9;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bot-info {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .bot-avatar {
+            width: 48px;
+            height: 48px;
+
+            border-radius: 50%;
+
+            background: #e6f6ef;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 25px;
+        }
+
+        .bot-name {
+            font-size: 19px;
+            font-weight: 700;
+            color: #17352d;
+        }
+
+        .bot-status {
+            font-size: 13px;
+            color: #4e8b73;
+
+            margin-top: 2px;
+        }
+
+        .online-dot {
+            display: inline-block;
+
+            width: 8px;
+            height: 8px;
+
+            background: #20a464;
+
+            border-radius: 50%;
+
+            margin-right: 5px;
+        }
+
+        .mode-badge {
+            background: #eef7f3;
+
+            color: #337763;
+
+            padding: 7px 12px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+        }
+
+        /* ---------------- MESSAGES ---------------- */
+
+        .messages {
+            flex: 1;
+
+            padding: 25px;
+
+            overflow-y: auto;
+
+            min-height: 390px;
+
+            background:
+                linear-gradient(
+                    rgba(247, 252, 250, 0.9),
+                    rgba(247, 252, 250, 0.9)
+                );
+        }
+
+        .welcome-message {
+            text-align: center;
+
+            max-width: 600px;
+
+            margin: 35px auto;
+        }
+
+        .welcome-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        .welcome-message h3 {
+            color: #17352d;
+            margin-bottom: 8px;
+        }
+
+        .welcome-message p {
+            color: #71847d;
+            line-height: 1.6;
+        }
+
+        .message-row {
+            display: flex;
+            margin-bottom: 18px;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .message-row.bot {
+            justify-content: flex-start;
+        }
+
+        .message {
+            max-width: 75%;
+
+            padding: 13px 17px;
+
+            border-radius: 18px;
+
+            line-height: 1.55;
+
+            font-size: 15px;
+
+            word-wrap: break-word;
+        }
+
+        .message.user-message {
+            background: linear-gradient(
+                135deg,
+                #009879,
+                #25aa6d
+            );
+
+            color: white;
+
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot-message {
+            background: white;
+
+            color: #263d35;
+
+            border: 1px solid #dcebe5;
+
+            border-bottom-left-radius: 5px;
+
+            box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+        }
+
+        .message-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            opacity: 0.7;
+        }
+
+        /* ---------------- SUGGESTIONS ---------------- */
+
+        .suggestions {
+            padding: 0 25px 15px;
+
+            background: #f7fcfa;
+        }
+
+        .suggestion-title {
+            font-size: 12px;
+            color: #71847d;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-btn {
+            border: 1px solid #cfe4db;
+
+            background: white;
+
+            color: #357563;
+
+            border-radius: 18px;
+
+            padding: 7px 12px;
+
+            font-size: 12px;
+
+            cursor: pointer;
+        }
+
+        .suggestion-btn:hover {
+            background: #eaf7f1;
+        }
+
+        /* ---------------- INPUT ---------------- */
+
+        .input-area {
+            border-top: 1px solid #e5eee9;
+
+            padding: 18px 20px;
+
+            background: white;
+        }
+
+        .input-form {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .message-input {
+            flex: 1;
+
+            height: 50px;
+
+            border: 1px solid #d2e5de;
+
+            border-radius: 26px;
+
+            padding: 0 18px;
+
+            outline: none;
+
+            font-size: 15px;
+
+            background: #f9fcfb;
+        }
+
+        .message-input:focus {
+            border-color: #0a9d7b;
+
+            background: white;
+
+            box-shadow: 0 0 0 3px rgba(10,157,123,0.08);
+        }
+
+        .icon-button {
+            width: 46px;
+            height: 46px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #eaf6f1;
+
+            color: #087e65;
+
+            font-size: 19px;
+
+            cursor: pointer;
+        }
+
+        .icon-button:hover {
+            background: #d9eee7;
+        }
+
+        .send-button {
+            height: 46px;
+
+            padding: 0 20px;
+
+            border: none;
+
+            border-radius: 24px;
+
+            color: white;
+
+            background: linear-gradient(
+                90deg,
+                #009b79,
+                #25aa6d
+            );
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .send-button:hover {
+            opacity: 0.92;
+        }
+
+        .mic-status {
+            font-size: 12px;
+
+            color: #71847d;
+
+            margin-top: 7px;
+
+            min-height: 17px;
+        }
+
+        .disclaimer {
+            text-align: center;
+
+            font-size: 11px;
+
+            color: #8a9994;
+
+            margin-top: 8px;
+        }
+
+        /* ---------------- RESPONSIVE ---------------- */
+
+        @media (max-width: 700px) {
+
+            .chat-header {
+                padding: 15px;
             }
 
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-IN';
-            recognition.continuous = false;
-            recognition.interimResults = false;
+            .header-links {
+                display: none;
+            }
 
-            document.getElementById('micStatus').innerText = "Listening... speak now.";
+            .chat-wrapper {
+                margin: 15px auto;
 
-            recognition.start();
+                padding: 0 10px;
+            }
 
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('messageInput').value = transcript;
-                document.getElementById('micStatus').innerText = "Heard: " + transcript;
-            };
+            .chat-card {
+                min-height: calc(100vh - 120px);
 
-            recognition.onerror = function(event) {
-                document.getElementById('micStatus').innerText = "Error: " + event.error;
-            };
+                border-radius: 18px;
+            }
 
-            recognition.onend = function() {
-                if (document.getElementById('micStatus').innerText === "Listening... speak now.") {
-                    document.getElementById('micStatus').innerText = "Didn't catch that, try again.";
-                }
-            };
+            .message {
+                max-width: 88%;
+            }
+
+            .suggestion-buttons {
+                overflow-x: auto;
+
+                flex-wrap: nowrap;
+            }
+
+            .suggestion-btn {
+                white-space: nowrap;
+            }
+
+            .send-button {
+                padding: 0 14px;
+            }
         }
-    </script>
+    </style>
+</head>
+
+<body>
+
+<div class="chat-page">
+
+    <!-- HEADER -->
+    <header class="chat-header">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                🤖
+            </div>
+
+            <div>
+                <div class="brand-title">
+                    Diabetes Care Assistant
+                </div>
+
+                <div class="brand-subtitle">
+                    AI-powered diabetes lifestyle support
+                </div>
+            </div>
+
+        </div>
+
+        <div class="header-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="/dashboard">
+                Dashboard
+            </a>
+
+            <a href="/logout">
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- CHAT -->
+    <main class="chat-wrapper">
+
+        <div class="chat-card">
+
+            <!-- BOT HEADER -->
+            <div class="chat-title-area">
+
+                <div class="bot-info">
+
+                    <div class="bot-avatar">
+                        🤖
+                    </div>
+
+                    <div>
+
+                        <div class="bot-name">
+                            {{ t.chatbot_title }}
+                        </div>
+
+                        <div class="bot-status">
+                            <span class="online-dot"></span>
+                            Ready to help
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% if mode %}
+                    <div class="mode-badge">
+                        {{ mode|capitalize }} mode
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <!-- MESSAGES -->
+<div class="messages" id="messages">
+
+    {% if chat_history %}
+
+        {% for chat in chat_history %}
+
+            <!-- USER MESSAGE -->
+            <div class="message-row user">
+
+                <div class="message user-message">
+
+                    <div class="message-label">
+                        You
+                    </div>
+
+                    {{ chat.user }}
+
+                </div>
+
+            </div>
+
+
+            <!-- BOT MESSAGE -->
+            <div class="message-row bot">
+
+                <div class="message bot-message">
+
+                    <div class="message-label">
+                        Diabetes Care Assistant
+                    </div>
+
+                    {{ chat.assistant }}
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="welcome-message">
+
+            <div class="welcome-icon">
+                🩺
+            </div>
+
+            <h3>
+                Hello! 👋
+            </h3>
+
+            <p>
+                I'm your diabetes lifestyle assistant.
+                You can ask me about food, exercise,
+                glucose, BMI, symptoms, stress and
+                healthy habits.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+            <!-- SUGGESTIONS -->
+            <div class="suggestions">
+
+                <div class="suggestion-title">
+                    Try asking:
+                </div>
+
+                <div class="suggestion-buttons">
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        onclick="useSuggestion('What foods are good for diabetes?')"
+                    >
+                        🥗 Healthy food
+                    </button>
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        onclick="useSuggestion('What exercise is good for diabetes?')"
+                    >
+                        🚶 Exercise
+                    </button>
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        onclick="useSuggestion('What is a normal glucose level?')"
+                    >
+                        🩸 Glucose
+                    </button>
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        onclick="useSuggestion('What is a healthy BMI?')"
+                    >
+                        ⚖️ BMI
+                    </button>
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        onclick="useSuggestion('What are common diabetes symptoms?')"
+                    >
+                        🔎 Symptoms
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- INPUT -->
+            <div class="input-area">
+
+                <form
+                    action="/chatbot"
+                    method="POST"
+                    class="input-form"
+                    onsubmit="showSending()"
+                >
+
+                    <input
+                        type="text"
+                        name="message"
+                        id="messageInput"
+                        class="message-input"
+                        placeholder="{{ t.chatbot_placeholder }}"
+                        autocomplete="off"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        id="micButton"
+                        class="icon-button"
+                        onclick="startListening()"
+                        title="Voice input"
+                    >
+                        🎤
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="send-button"
+                        id="sendButton"
+                    >
+                        Send
+                    </button>
+
+                </form>
+
+                <div
+                    id="micStatus"
+                    class="mic-status"
+                ></div>
+
+                <div class="disclaimer">
+                    Educational support only — not a replacement for medical advice.
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    const messageInput =
+        document.getElementById("messageInput");
+
+    const micStatus =
+        document.getElementById("micStatus");
+
+
+    /* --------------------------------
+       SUGGESTION BUTTON
+    -------------------------------- */
+
+    function useSuggestion(text) {
+
+        messageInput.value = text;
+
+        messageInput.focus();
+
+    }
+
+
+    /* --------------------------------
+       VOICE INPUT
+    -------------------------------- */
+
+    function startListening() {
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+
+            micStatus.innerText =
+                "Voice input is not supported in this browser. Try Chrome.";
+
+            return;
+        }
+
+        const recognition =
+            new SpeechRecognition();
+
+        recognition.lang = "en-IN";
+
+        recognition.continuous = false;
+
+        recognition.interimResults = false;
+
+
+        micStatus.innerText =
+            "🎙️ Listening... speak now.";
+
+
+        const micButton =
+            document.getElementById("micButton");
+
+        micButton.innerText = "⏺️";
+
+
+        recognition.start();
+
+
+        recognition.onresult = function(event) {
+
+            const transcript =
+                event.results[0][0].transcript;
+
+            messageInput.value =
+                transcript;
+
+            micStatus.innerText =
+                "Heard: " + transcript;
+
+            micButton.innerText = "🎤";
+
+        };
+
+
+        recognition.onerror = function(event) {
+
+            micStatus.innerText =
+                "Voice input error: " +
+                event.error;
+
+            micButton.innerText = "🎤";
+
+        };
+
+
+        recognition.onend = function() {
+
+            micButton.innerText = "🎤";
+
+        };
+
+    }
+
+
+    /* --------------------------------
+       SEND STATUS
+    -------------------------------- */
+
+    function showSending() {
+
+        const sendButton =
+            document.getElementById("sendButton");
+
+        sendButton.disabled = true;
+
+        sendButton.innerText =
+            "Sending...";
+
+    }
+
+
+    /* --------------------------------
+       ENTER KEY
+    -------------------------------- */
+
+    messageInput.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                this.form.requestSubmit();
+
+            }
+
+        }
+    );
+
+
+    /* --------------------------------
+       AUTO SCROLL
+    -------------------------------- */
+
+    window.addEventListener(
+        "load",
+        function() {
+
+            const messages =
+                document.getElementById("messages");
+
+            messages.scrollTop =
+                messages.scrollHeight;
+
+        }
+    );
+
+</script>
+
 </body>
 </html>

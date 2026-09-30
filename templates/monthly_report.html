@@ -5,14 +5,14 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>{{ t.monthly_report_title }}</title>
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+        rel="stylesheet"
+    >
 
     <style>
 
@@ -54,11 +54,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: linear-gradient(
-                135deg,
-                #009b79,
-                #d4bd32
-            );
+            background: linear-gradient(135deg, #009b79, #d4bd32);
             color: white;
             display: flex;
             align-items: center;
@@ -148,19 +144,27 @@
 
         .content-area {
             padding: 30px;
-            max-width: 1200px;
+            max-width: 1400px;
         }
 
-        /* SUMMARY CARDS */
+        /* CARDS */
 
-        .summary-card {
+        .summary-card,
+        .card-custom {
             background: white;
             border: 1px solid #d8e9e2;
             border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(30, 100, 78, 0.05);
+        }
+
+        .summary-card {
             padding: 24px;
-            box-shadow:
-                0 8px 25px rgba(30, 100, 78, 0.05);
             height: 100%;
+        }
+
+        .card-custom {
+            padding: 30px;
+            margin-top: 25px;
         }
 
         .summary-label {
@@ -180,22 +184,40 @@
             margin-bottom: 10px;
         }
 
-        /* MAIN CARD */
-
-        .card-custom {
-            background: white;
-            border: 1px solid #d8e9e2;
-            border-radius: 22px;
-            padding: 30px;
-            box-shadow:
-                0 8px 25px rgba(30, 100, 78, 0.05);
-            margin-top: 25px;
-        }
-
         .card-title {
             font-size: 21px;
             font-weight: 700;
             margin-bottom: 22px;
+        }
+
+        /* INFORMATION */
+
+        .info-box {
+            background: #f7fcfa;
+            border: 1px solid #dcebe5;
+            border-radius: 15px;
+            padding: 17px;
+            height: 100%;
+        }
+
+        .info-label {
+            color: #71847d;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #17352d;
+            word-break: break-word;
+        }
+
+        .section-label {
+            font-size: 15px;
+            font-weight: 700;
+            color: #008b6d;
+            margin-bottom: 14px;
         }
 
         /* RISK */
@@ -220,11 +242,6 @@
             color: #008b6d;
         }
 
-        .probability {
-            margin-top: 8px;
-            color: #526a62;
-        }
-
         /* TABLE */
 
         .table-container {
@@ -240,6 +257,7 @@
             color: #36574d;
             border: none;
             padding: 14px;
+            white-space: nowrap;
         }
 
         .table tbody td {
@@ -247,6 +265,8 @@
             vertical-align: middle;
             border-color: #e1eee9;
         }
+
+        /* BADGES */
 
         .risk-badge {
             display: inline-block;
@@ -256,6 +276,51 @@
             font-size: 13px;
             background: #e6f5ef;
             color: #087e65;
+        }
+
+        .change-positive {
+            color: #087e65;
+            font-weight: 600;
+        }
+
+        .change-negative {
+            color: #c62828;
+            font-weight: 600;
+        }
+
+        .change-neutral {
+            color: #71847d;
+            font-weight: 600;
+        }
+
+        /* PROGRESS */
+
+        .progress-banner {
+            background: linear-gradient(135deg, #e7f7f0, #f8fbdf);
+            border: 1px solid #cce7dc;
+            border-radius: 18px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .progress-banner h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .progress-banner p {
+            margin-bottom: 0;
+            color: #526a62;
+            line-height: 1.7;
+        }
+
+        /* CHART */
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin-top: 15px;
         }
 
         /* EMPTY */
@@ -269,6 +334,30 @@
         .empty-icon {
             font-size: 50px;
             margin-bottom: 15px;
+        }
+
+        /* PRINT */
+
+        @media print {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .top-header {
+                border: none;
+            }
+
+            .card-custom,
+            .summary-card {
+                box-shadow: none;
+            }
+
         }
 
         /* MOBILE */
@@ -303,7 +392,6 @@
 
 <body>
 
-
 <div class="app-layout">
 
 
@@ -326,150 +414,63 @@
 
         <nav class="nav-menu">
 
-
-            <a
-                href="{{ url_for('dashboard') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⌂
-                </span>
-
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌂</span>
                 {{ t.nav_dashboard }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('home') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ♙
-                </span>
-
+            <a href="{{ url_for('home') }}" class="nav-item">
+                <span class="nav-icon">♙</span>
                 {{ t.nav_patient_data }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('dashboard') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⌁
-                </span>
-
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">⌁</span>
                 {{ t.nav_glucose }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('medication') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ◈
-                </span>
-
+            <a href="{{ url_for('medication') }}" class="nav-item">
+                <span class="nav-icon">◈</span>
                 {{ t.nav_medication }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('appointments') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    □
-                </span>
-
+            <a href="{{ url_for('appointments') }}" class="nav-item">
+                <span class="nav-icon">□</span>
                 {{ t.nav_appointments }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('doctor_locator') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⌖
-                </span>
-
+            <a href="{{ url_for('doctor_locator') }}" class="nav-item">
+                <span class="nav-icon">⌖</span>
                 {{ t.nav_hospitals }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('progress') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⌁
-                </span>
-
+            <a href="{{ url_for('progress') }}" class="nav-item">
+                <span class="nav-icon">⌁</span>
                 {{ t.nav_progress }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('download_report') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ▤
-                </span>
-
+            <a href="{{ url_for('download_report') }}" class="nav-item">
+                <span class="nav-icon">▤</span>
                 {{ t.nav_records }}
-
             </a>
 
-
-            <a
-                href="{{ url_for('bmi_calculator') }}"
-                class="nav-item">
-
-                <span class="nav-icon">
-                    ⚖
-                </span>
-
+            <a href="{{ url_for('bmi_calculator') }}" class="nav-item">
+                <span class="nav-icon">⚖</span>
                 {{ t.nav_bmi }}
-
             </a>
 
-
-            <!-- ACTIVE -->
-
-            <a
-                href="{{ url_for('monthly_report') }}"
-                class="nav-item active">
-
-                <span class="nav-icon">
-                    ▧
-                </span>
-
+            <a href="{{ url_for('monthly_report') }}" class="nav-item active">
+                <span class="nav-icon">▧</span>
                 {{ t.nav_monthly_report }}
-
             </a>
-
 
         </nav>
 
 
         <div class="sidebar-bottom">
 
-            <a
-                href="{{ url_for('logout') }}"
-                class="signout">
-
+            <a href="{{ url_for('logout') }}" class="signout">
                 ⇥ &nbsp; {{ t.nav_signout }}
-
             </a>
 
         </div>
@@ -477,7 +478,7 @@
     </aside>
 
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN -->
 
     <main class="main-content">
 
@@ -489,7 +490,7 @@
             </h1>
 
             <p class="page-subtitle">
-                {{ t.progress_subtitle }}
+                Patient health history, current assessment and progress
             </p>
 
         </header>
@@ -498,7 +499,7 @@
         <div class="content-area">
 
 
-            <!-- SUMMARY CARDS -->
+            <!-- SUMMARY -->
 
             <div class="row g-4">
 
@@ -507,12 +508,10 @@
 
                     <div class="summary-card">
 
-                        <div class="summary-icon">
-                            📋
-                        </div>
+                        <div class="summary-icon">📋</div>
 
                         <div class="summary-label">
-                            {{ t.total_predictions }}
+                            Total Assessments
                         </div>
 
                         <div class="summary-value">
@@ -528,12 +527,10 @@
 
                     <div class="summary-card">
 
-                        <div class="summary-icon">
-                            🩸
-                        </div>
+                        <div class="summary-icon">🩸</div>
 
                         <div class="summary-label">
-                            {{ t.average_glucose }}
+                            Average Glucose
                         </div>
 
                         <div class="summary-value">
@@ -555,12 +552,10 @@
 
                     <div class="summary-card">
 
-                        <div class="summary-icon">
-                            ⚖️
-                        </div>
+                        <div class="summary-icon">⚖️</div>
 
                         <div class="summary-label">
-                            {{ t.average_bmi }}
+                            Average BMI
                         </div>
 
                         <div class="summary-value">
@@ -576,56 +571,154 @@
 
                     <div class="summary-card">
 
-                        <div class="summary-icon">
-                            ❤️
-                        </div>
+                        <div class="summary-icon">❤️</div>
 
                         <div class="summary-label">
-                            {{ t.latest_risk }}
+                            Current AI Risk
                         </div>
 
                         <div class="summary-value">
-
                             {{ latest_risk }}
-
                         </div>
 
-                        <div style="color:#71847d; margin-top:5px;">
-
+                        <div style="color:#71847d;">
                             {{ latest_probability }}%
-
                         </div>
 
                     </div>
 
                 </div>
 
-
             </div>
 
 
-            <!-- LATEST RISK -->
+            <!-- PATIENT PROFILE -->
 
             <div class="card-custom">
 
                 <h2 class="card-title">
-                    ❤️ {{ t.latest_risk }}
+                    👤 Patient Profile
+                </h2>
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Patient Name
+                            </div>
+
+                            <div class="info-value">
+                                {{ patient.name or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Email
+                            </div>
+
+                            <div class="info-value">
+                                {{ patient.email or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Age
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if current_prediction and current_prediction.age is not none %}
+                                    {{ current_prediction.age }}
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Gender
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if current_prediction and current_prediction.gender %}
+                                    {{ current_prediction.gender }}
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- CURRENT ASSESSMENT -->
+
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    🩺 Current Health Assessment
                 </h2>
 
 
-                <div class="row g-4">
+                {% if current_prediction %}
 
 
-                    <div class="col-md-6">
+                <div class="row g-3">
 
-                        <div class="risk-box">
 
-                            <div class="risk-title">
-                                {{ t.risk_level }}
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Assessment Date
                             </div>
 
-                            <div class="risk-value">
-                                {{ latest_risk }}
+                            <div class="info-value">
+
+                                {% if current_prediction.date %}
+                                    {{ current_prediction.date.strftime('%d-%b-%Y %H:%M') }}
+                                {% else %}
+                                    -
+                                {% endif %}
+
                             </div>
 
                         </div>
@@ -633,17 +726,234 @@
                     </div>
 
 
-                    <div class="col-md-6">
+                    <div class="col-md-6 col-lg-3">
 
-                        <div class="risk-box">
+                        <div class="info-box">
 
-                            <div class="risk-title">
-                                {{ t.latest_probability }}
+                            <div class="info-label">
+                                Age
                             </div>
 
-                            <div class="risk-value">
+                            <div class="info-value">
+                                {{ current_prediction.age or '-' }}
+                            </div>
 
-                                {{ latest_probability }}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Gender
+                            </div>
+
+                            <div class="info-value">
+                                {{ current_prediction.gender or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Year
+                            </div>
+
+                            <div class="info-value">
+                                {{ current_prediction.year or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Location
+                            </div>
+
+                            <div class="info-value">
+                                {{ current_prediction.location or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Race
+                            </div>
+
+                            <div class="info-value">
+                                {{ current_prediction.race or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Smoking History
+                            </div>
+
+                            <div class="info-value">
+                                {{ current_prediction.smoking_history or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Hypertension
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if current_prediction.hypertension == 1 %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Heart Disease
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if current_prediction.heart_disease == 1 %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Blood Glucose
+                            </div>
+
+                            <div class="info-value">
+
+                                {{ current_prediction.glucose
+                                   if current_prediction.glucose is not none
+                                   else '-' }}
+
+                                mg/dL
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                BMI
+                            </div>
+
+                            <div class="info-value">
+
+                                {{ current_prediction.bmi
+                                   if current_prediction.bmi is not none
+                                   else '-' }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                HbA1c
+                            </div>
+
+                            <div class="info-value">
+
+                                {{ current_prediction.hbA1c_level
+                                   if current_prediction.hbA1c_level is not none
+                                   else '-' }}%
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Blood Pressure
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if current_prediction.blood_pressure %}
+                                    {{ current_prediction.blood_pressure }} mmHg
+                                {% else %}
+                                    Not recorded
+                                {% endif %}
 
                             </div>
 
@@ -654,15 +964,621 @@
 
                 </div>
 
+
+                <div class="row g-4 mt-2">
+
+
+                    <div class="col-md-6">
+
+                        <div class="risk-box">
+
+                            <div class="risk-title">
+                                Current Risk Level
+                            </div>
+
+                            <div class="risk-value">
+                                {{ current_prediction.risk_tier or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="risk-box">
+
+                            <div class="risk-title">
+                                Current Risk Probability
+                            </div>
+
+                            <div class="risk-value">
+                                {{ current_prediction.probability or 0 }}%
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                {% else %}
+
+
+                <div class="empty-message">
+
+                    <div class="empty-icon">
+                        🩺
+                    </div>
+
+                    <h4>
+                        No current assessment
+                    </h4>
+
+                    <p>
+                        Make a prediction to generate the current health assessment.
+                    </p>
+
+                </div>
+
+
+                {% endif %}
+
             </div>
 
 
-            <!-- PREDICTION HISTORY -->
+            <!-- PREVIOUS ASSESSMENT -->
 
             <div class="card-custom">
 
                 <h2 class="card-title">
-                    📈 {{ t.prediction_history }}
+                    🕘 Previous Health Assessment
+                </h2>
+
+
+                {% if previous_prediction %}
+
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Assessment Date
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if previous_prediction.date %}
+                                    {{ previous_prediction.date.strftime('%d-%b-%Y %H:%M') }}
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Age
+                            </div>
+
+                            <div class="info-value">
+                                {{ previous_prediction.age or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Gender
+                            </div>
+
+                            <div class="info-value">
+                                {{ previous_prediction.gender or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Location
+                            </div>
+
+                            <div class="info-value">
+                                {{ previous_prediction.location or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Race
+                            </div>
+
+                            <div class="info-value">
+                                {{ previous_prediction.race or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Smoking History
+                            </div>
+
+                            <div class="info-value">
+                                {{ previous_prediction.smoking_history or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Hypertension
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if previous_prediction.hypertension == 1 %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Heart Disease
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if previous_prediction.heart_disease == 1 %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Glucose
+                            </div>
+
+                            <div class="info-value">
+
+                                {{ previous_prediction.glucose
+                                   if previous_prediction.glucose is not none
+                                   else '-' }}
+
+                                mg/dL
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                BMI
+                            </div>
+
+                            <div class="info-value">
+
+                                {{ previous_prediction.bmi
+                                   if previous_prediction.bmi is not none
+                                   else '-' }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                HbA1c
+                            </div>
+
+                            <div class="info-value">
+
+                                {{ previous_prediction.hbA1c_level
+                                   if previous_prediction.hbA1c_level is not none
+                                   else '-' }}%
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Risk Level
+                            </div>
+
+                            <div class="info-value">
+                                {{ previous_prediction.risk_tier or '-' }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Risk Probability
+                            </div>
+
+                            <div class="info-value">
+                                {{ previous_prediction.probability or 0 }}%
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                {% else %}
+
+
+                <div class="empty-message">
+
+                    <div class="empty-icon">
+                        🕘
+                    </div>
+
+                    <h4>
+                        No previous assessment
+                    </h4>
+
+                    <p>
+                        A previous assessment will appear after another prediction is recorded.
+                    </p>
+
+                </div>
+
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- CURRENT VS PREVIOUS -->
+
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    📈 Current vs Previous Assessment
+                </h2>
+
+
+                {% if current_prediction and previous_prediction %}
+
+
+                <div class="table-container">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Health Parameter
+                                </th>
+
+                                <th>
+                                    Previous
+                                </th>
+
+                                <th>
+                                    Current
+                                </th>
+
+                                <th>
+                                    Change
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            <!-- GLUCOSE -->
+
+                            <tr>
+
+                                <td>
+                                    Blood Glucose
+                                </td>
+
+                                <td>
+                                    {{ previous_prediction.glucose or 0 }} mg/dL
+                                </td>
+
+                                <td>
+                                    {{ current_prediction.glucose or 0 }} mg/dL
+                                </td>
+
+                                <td
+                                    id="glucoseChange"
+                                    data-previous="{{ previous_prediction.glucose or 0 }}"
+                                    data-current="{{ current_prediction.glucose or 0 }}">
+                                </td>
+
+                            </tr>
+
+
+                            <!-- BMI -->
+
+                            <tr>
+
+                                <td>
+                                    BMI
+                                </td>
+
+                                <td>
+                                    {{ previous_prediction.bmi or 0 }}
+                                </td>
+
+                                <td>
+                                    {{ current_prediction.bmi or 0 }}
+                                </td>
+
+                                <td
+                                    id="bmiChange"
+                                    data-previous="{{ previous_prediction.bmi or 0 }}"
+                                    data-current="{{ current_prediction.bmi or 0 }}">
+                                </td>
+
+                            </tr>
+
+
+                            <!-- HBA1C -->
+
+                            <tr>
+
+                                <td>
+                                    HbA1c
+                                </td>
+
+                                <td>
+                                    {{ previous_prediction.hbA1c_level or 0 }}%
+                                </td>
+
+                                <td>
+                                    {{ current_prediction.hbA1c_level or 0 }}%
+                                </td>
+
+                                <td
+                                    id="hba1cChange"
+                                    data-previous="{{ previous_prediction.hbA1c_level or 0 }}"
+                                    data-current="{{ current_prediction.hbA1c_level or 0 }}">
+                                </td>
+
+                            </tr>
+
+
+                            <!-- RISK -->
+
+                            <tr>
+
+                                <td>
+                                    AI Risk Probability
+                                </td>
+
+                                <td>
+                                    {{ previous_prediction.probability or 0 }}%
+                                </td>
+
+                                <td>
+                                    {{ current_prediction.probability or 0 }}%
+                                </td>
+
+                                <td
+                                    id="riskChange"
+                                    data-previous="{{ previous_prediction.probability or 0 }}"
+                                    data-current="{{ current_prediction.probability or 0 }}">
+                                </td>
+
+                            </tr>
+
+
+                            <!-- RISK LEVEL -->
+
+                            <tr>
+
+                                <td>
+                                    Risk Level
+                                </td>
+
+                                <td>
+                                    <span class="risk-badge">
+                                        {{ previous_prediction.risk_tier or '-' }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="risk-badge">
+                                        {{ current_prediction.risk_tier or '-' }}
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    {% if previous_prediction.risk_tier == current_prediction.risk_tier %}
+
+                                        <span class="change-neutral">
+                                            No change
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="change-positive">
+                                            Risk level changed
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="progress-banner">
+
+                    <h3>
+                        📊 Progress Summary
+                    </h3>
+
+                    <p id="progressMessage">
+                        Comparing your current and previous assessments...
+                    </p>
+
+                </div>
+
+
+                <!-- CHART -->
+
+                <div class="card-custom">
+
+                    <h2 class="card-title">
+                        📊 Health Comparison Chart
+                    </h2>
+
+                    <div class="chart-container">
+
+                        <canvas id="healthComparisonChart"></canvas>
+
+                    </div>
+
+                </div>
+
+
+                {% else %}
+
+
+                <div class="empty-message">
+
+                    <div class="empty-icon">
+                        📈
+                    </div>
+
+                    <h4>
+                        Progress comparison not available
+                    </h4>
+
+                    <p>
+                        Make at least two assessments to compare your health progress.
+                    </p>
+
+                </div>
+
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- COMPLETE HISTORY -->
+
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    📋 Complete Prediction History
                 </h2>
 
 
@@ -677,29 +1593,18 @@
 
                             <tr>
 
-                                <th>
-                                    {{ t.date }}
-                                </th>
-
-                                <th>
-                                    {{ t.glucose }}
-                                </th>
-
-                                <th>
-                                    {{ t.bmi }}
-                                </th>
-
-                                <th>
-                                    {{ t.bloodpressure }}
-                                </th>
-
-                                <th>
-                                    {{ t.risk_level }}
-                                </th>
-
-                                <th>
-                                    {{ t.risk_probability }}
-                                </th>
+                                <th>Date</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Location</th>
+                                <th>Glucose</th>
+                                <th>BMI</th>
+                                <th>HbA1c</th>
+                                <th>Hypertension</th>
+                                <th>Heart Disease</th>
+                                <th>Smoking</th>
+                                <th>Risk</th>
+                                <th>Probability</th>
 
                             </tr>
 
@@ -707,7 +1612,6 @@
 
 
                         <tbody>
-
 
                         {% for prediction in predictions %}
 
@@ -727,54 +1631,69 @@
 
                                 </td>
 
+                                <td>
+                                    {{ prediction.age or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ prediction.gender or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ prediction.location or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ prediction.glucose or 0 }} mg/dL
+                                </td>
+
+                                <td>
+                                    {{ prediction.bmi or 0 }}
+                                </td>
+
+                                <td>
+                                    {{ prediction.hbA1c_level or 0 }}%
+                                </td>
 
                                 <td>
 
-                                    {{ prediction.glucose }}
-
-                                    mg/dL
+                                    {% if prediction.hypertension == 1 %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
 
                                 </td>
-
 
                                 <td>
 
-                                    {{ prediction.bmi }}
+                                    {% if prediction.heart_disease == 1 %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
 
                                 </td>
-
 
                                 <td>
-
-                                    {{ prediction.blood_pressure }}
-
-                                    mmHg
-
+                                    {{ prediction.smoking_history or '-' }}
                                 </td>
-
 
                                 <td>
 
                                     <span class="risk-badge">
-
-                                        {{ prediction.risk_tier }}
-
+                                        {{ prediction.risk_tier or '-' }}
                                     </span>
 
                                 </td>
 
-
                                 <td>
-
-                                    {{ prediction.probability }}%
-
+                                    {{ prediction.probability or 0 }}%
                                 </td>
-
 
                             </tr>
 
                         {% endfor %}
-
 
                         </tbody>
 
@@ -789,41 +1708,607 @@
                 <div class="empty-message">
 
                     <div class="empty-icon">
-                        📊
+                        📋
                     </div>
 
                     <h4>
-                        {{ t.no_predictions }}
+                        No prediction records
                     </h4>
 
                     <p>
-                        {{ t.progress_prediction_message }}
+                        Make a prediction to create the patient's health history.
                     </p>
-
-                    <a
-                        href="{{ url_for('home') }}"
-                        class="btn btn-success">
-
-                        {{ t.make_prediction }}
-
-                    </a>
 
                 </div>
 
 
                 {% endif %}
 
+            </div>
+
+
+            <!-- MEDICATIONS -->
+
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    💊 Medication Information
+                </h2>
+
+
+                {% if medications %}
+
+
+                <div class="table-container">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Medicine
+                                </th>
+
+                                <th>
+                                    Dosage
+                                </th>
+
+                                <th>
+                                    Time
+                                </th>
+
+                                <th>
+                                    Notes
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for medication in medications %}
+
+                            <tr>
+
+                                <td>
+                                    {{ medication.medicine_name or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ medication.dosage or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ medication.time or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ medication.notes or '-' }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                {% else %}
+
+
+                <div class="empty-message">
+
+                    <div class="empty-icon">
+                        💊
+                    </div>
+
+                    <h4>
+                        No medication records
+                    </h4>
+
+                    <p>
+                        No medications have been added yet.
+                    </p>
+
+                </div>
+
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- APPOINTMENTS -->
+
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    📅 Appointment Information
+                </h2>
+
+
+                {% if appointments %}
+
+
+                <div class="table-container">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Doctor
+                                </th>
+
+                                <th>
+                                    Hospital
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th>
+                                    Time
+                                </th>
+
+                                <th>
+                                    Reason
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for appointment in appointments %}
+
+                            <tr>
+
+                                <td>
+                                    {{ appointment.doctor_name or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ appointment.hospital or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ appointment.appointment_date or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ appointment.appointment_time or '-' }}
+                                </td>
+
+                                <td>
+                                    {{ appointment.purpose or '-' }}
+                                </td>
+
+                                <td>
+
+                                    <span class="risk-badge">
+                                        {{ appointment.status or 'Pending' }}
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                {% else %}
+
+
+                <div class="empty-message">
+
+                    <div class="empty-icon">
+                        📅
+                    </div>
+
+                    <h4>
+                        No appointment records
+                    </h4>
+
+                    <p>
+                        No appointments have been scheduled yet.
+                    </p>
+
+                </div>
+
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- REPORT SUMMARY -->
+
+            <div class="card-custom">
+
+                <h2 class="card-title">
+                    📝 Report Summary
+                </h2>
+
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-4">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Total Assessments
+                            </div>
+
+                            <div class="info-value">
+                                {{ total_predictions }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Average Glucose
+                            </div>
+
+                            <div class="info-value">
+                                {{ average_glucose }} mg/dL
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Average BMI
+                            </div>
+
+                            <div class="info-value">
+                                {{ average_bmi }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="row g-3 mt-1">
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Current Risk
+                            </div>
+
+                            <div class="info-value">
+                                {{ latest_risk }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+                                Current Risk Probability
+                            </div>
+
+                            <div class="info-value">
+                                {{ latest_probability }}%
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
 
             </div>
 
 
         </div>
 
-
     </main>
 
-
 </div>
+
+
+<!-- CHART.JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const glucoseElement = document.getElementById("glucoseChange");
+    const bmiElement = document.getElementById("bmiChange");
+    const hba1cElement = document.getElementById("hba1cChange");
+    const riskElement = document.getElementById("riskChange");
+
+    function getValue(element) {
+
+        if (!element) {
+            return 0;
+        }
+
+        return parseFloat(element.dataset.current || 0);
+
+    }
+
+
+    function getPreviousValue(element) {
+
+        if (!element) {
+            return 0;
+        }
+
+        return parseFloat(element.dataset.previous || 0);
+
+    }
+
+
+    function showChange(element, unit) {
+
+        if (!element) {
+            return;
+        }
+
+        const current = getValue(element);
+        const previous = getPreviousValue(element);
+
+        const difference = current - previous;
+
+        if (difference < 0) {
+
+            element.innerHTML =
+                '<span class="change-positive">↓ ' +
+                Math.abs(difference).toFixed(2) +
+                ' ' +
+                unit +
+                '</span>';
+
+        } else if (difference > 0) {
+
+            element.innerHTML =
+                '<span class="change-negative">↑ ' +
+                difference.toFixed(2) +
+                ' ' +
+                unit +
+                '</span>';
+
+        } else {
+
+            element.innerHTML =
+                '<span class="change-neutral">No change</span>';
+
+        }
+
+    }
+
+
+    showChange(glucoseElement, "mg/dL");
+
+    showChange(bmiElement, "BMI");
+
+    showChange(hba1cElement, "%");
+
+    showChange(riskElement, "%");
+
+
+    /* PROGRESS MESSAGE */
+
+    const progressMessage =
+        document.getElementById("progressMessage");
+
+
+    if (progressMessage && riskElement) {
+
+        const currentRisk =
+            getValue(riskElement);
+
+        const previousRisk =
+            getPreviousValue(riskElement);
+
+        const riskDifference =
+            currentRisk - previousRisk;
+
+
+        if (riskDifference < 0) {
+
+            progressMessage.innerHTML =
+                "The current AI risk probability is " +
+                Math.abs(riskDifference).toFixed(2) +
+                " percentage points lower than the previous assessment.";
+
+        } else if (riskDifference > 0) {
+
+            progressMessage.innerHTML =
+                "The current AI risk probability is " +
+                riskDifference.toFixed(2) +
+                " percentage points higher than the previous assessment.";
+
+        } else {
+
+            progressMessage.innerHTML =
+                "The current AI risk probability is unchanged compared with the previous assessment.";
+
+        }
+
+    }
+
+
+    /* CHART */
+
+    const canvas =
+        document.getElementById("healthComparisonChart");
+
+
+    if (!canvas) {
+        return;
+    }
+
+
+    const previousGlucose =
+        getPreviousValue(glucoseElement);
+
+    const currentGlucose =
+        getValue(glucoseElement);
+
+
+    const previousBMI =
+        getPreviousValue(bmiElement);
+
+    const currentBMI =
+        getValue(bmiElement);
+
+
+    const previousHbA1c =
+        getPreviousValue(hba1cElement);
+
+    const currentHbA1c =
+        getValue(hba1cElement);
+
+
+    const previousRisk =
+        getPreviousValue(riskElement);
+
+    const currentRisk =
+        getValue(riskElement);
+
+
+    new Chart(canvas, {
+
+        type: "bar",
+
+        data: {
+
+            labels: [
+                "Glucose",
+                "BMI",
+                "HbA1c",
+                "AI Risk"
+            ],
+
+            datasets: [
+
+                {
+                    label: "Previous Assessment",
+
+                    data: [
+                        previousGlucose,
+                        previousBMI,
+                        previousHbA1c,
+                        previousRisk
+                    ],
+
+                    borderWidth: 1
+                },
+
+                {
+                    label: "Current Assessment",
+
+                    data: [
+                        currentGlucose,
+                        currentBMI,
+                        currentHbA1c,
+                        currentRisk
+                    ],
+
+                    borderWidth: 1
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    position: "top"
+                },
+
+                title: {
+
+                    display: true,
+
+                    text: "Previous vs Current Assessment"
+
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true
+
+                }
+
+            }
+
+        }
+
+    });
+
+});
+
+</script>
 
 
 </body>

@@ -91,6 +91,50 @@ class Prediction(db.Model):
         default=datetime.utcnow
     )
 
+    # -----------------------------------------------------
+    # Patient information at the time of prediction
+    # -----------------------------------------------------
+
+    year = db.Column(
+        db.Integer
+    )
+
+    gender = db.Column(
+        db.String(20)
+    )
+
+    age = db.Column(
+        db.Integer
+    )
+
+    location = db.Column(
+        db.String(100)
+    )
+
+    race = db.Column(
+        db.String(50)
+    )
+
+    # -----------------------------------------------------
+    # Health conditions
+    # -----------------------------------------------------
+
+    hypertension = db.Column(
+        db.Integer
+    )
+
+    heart_disease = db.Column(
+        db.Integer
+    )
+
+    smoking_history = db.Column(
+        db.String(50)
+    )
+
+    # -----------------------------------------------------
+    # Health measurements
+    # -----------------------------------------------------
+
     glucose = db.Column(
         db.Float
     )
@@ -99,9 +143,18 @@ class Prediction(db.Model):
         db.Float
     )
 
+    hbA1c_level = db.Column(
+        db.Float
+    )
+
+    # Kept for compatibility with the existing project
     blood_pressure = db.Column(
         db.Float
     )
+
+    # -----------------------------------------------------
+    # AI prediction
+    # -----------------------------------------------------
 
     risk_tier = db.Column(
         db.String(20)
@@ -153,17 +206,74 @@ class Medication(db.Model):
 
 
 # =========================================================
+# DOCTOR
+# =========================================================
+
+class Doctor(db.Model):
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    name = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    email = db.Column(
+        db.String(150),
+        unique=True,
+        nullable=False
+    )
+
+    password = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    specialization = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    hospital = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    phone = db.Column(
+        db.String(30)
+    )
+
+    appointments = db.relationship(
+        'Appointment',
+        backref='doctor',
+        lazy=True
+    )
+
+
+# =========================================================
 # APPOINTMENT
 # =========================================================
 
 class Appointment(db.Model):
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
 
     user_id = db.Column(
         db.Integer,
         db.ForeignKey("user.id"),
         nullable=False
+    )
+
+    doctor_id = db.Column(
+        db.Integer,
+        db.ForeignKey("doctor.id"),
+        nullable=True
     )
 
     doctor_name = db.Column(
@@ -192,13 +302,49 @@ class Appointment(db.Model):
 
     status = db.Column(
         db.String(20),
-        default="Booked"
+        default="Pending"
     )
 
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
     )
+
+    # -----------------------------------------------------
+    # REAL APPOINTMENT PROVIDER INFORMATION
+    # -----------------------------------------------------
+
+    provider = db.Column(
+        db.String(50),
+        default="local"
+    )
+
+    external_provider_id = db.Column(
+        db.String(150)
+    )
+
+    external_booking_id = db.Column(
+        db.String(150)
+    )
+
+    external_status = db.Column(
+        db.String(50)
+    )
+
+    # -----------------------------------------------------
+    # PRACTO / EXTERNAL PROVIDER CONSENT
+    # -----------------------------------------------------
+
+    practo_consent = db.Column(
+        db.Boolean,
+        default=False
+    )
+
+    practo_consent_at = db.Column(
+        db.DateTime,
+        nullable=True
+    )
+
 
 # =========================================================
 # NOTIFICATION
