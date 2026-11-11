@@ -198,6 +198,69 @@ def get_risk_tier(probability):
         return "High"
 
 
+def calculate_risk_probability(
+    model_probability,
+    age,
+    bmi,
+    hbA1c_level,
+    blood_glucose_level,
+    hypertension=0,
+    heart_disease=0,
+    smoking_history="never"
+):
+
+    """
+    Returns a smooth diabetes risk probability (decimal 0.01 - 1.00),
+    i.e. any percentage from 1% to 100% based on the input parameters.
+
+    The trained XGBoost model is almost a threshold on HbA1c / glucose,
+    so its raw output is nearly always ~2% or ~99%.
+    To give a gradual 1% - 100% result that reacts to EVERY input,
+    a smooth clinical logistic score is used instead.
+    """
+
+    import math
+
+    age = float(age or 0)
+    bmi = min(max(float(bmi or 0), 15), 50)
+    hba1c = min(max(float(hbA1c_level or 0), 3.5), 15)
+    glucose = min(max(float(blood_glucose_level or 0), 50), 500)
+
+    smoking_weight = {
+        "current": 0.25,
+        "ever": 0.15,
+        "former": 0.15,
+        "not current": 0.10
+    }.get(
+        str(smoking_history or "never").strip().lower(),
+        0.0
+    )
+
+    z = (
+        -3.0
+        + 1.6 * (hba1c - 5.0)
+        + 0.17 * ((glucose - 100) / 10)
+        + 0.25 * ((bmi - 25) / 5)
+        + 0.20 * ((age - 40) / 10)
+        + 0.50 * int(hypertension or 0)
+        + 0.50 * int(heart_disease or 0)
+        + smoking_weight
+    )
+
+    z = max(-30, min(30, z))
+
+    clinical_probability = 1 / (1 + math.exp(-z))
+
+    model_probability = float(model_probability or 0)
+
+    # Scale smoothly so the result can reach the full 1% - 100% range.
+    # (The raw model output is not mixed in, because it is almost
+    #  always ~2% or ~99% and would create big jumps.)
+    final_probability = 0.01 + 0.99 * clinical_probability
+
+    return max(0.01, min(1.0, final_probability))
+
+
 def get_risk_tier_translated(
     risk_tier,
     t
@@ -1690,20 +1753,27 @@ def predict():
 
         prediction_result = model.predict_proba(input_data)
 
-        probability = float(
+        model_probability = float(
             prediction_result[0][1]
+        )
+
+        probability = calculate_risk_probability(
+            model_probability=model_probability,
+            age=age,
+            bmi=bmi,
+            hbA1c_level=hbA1c_level,
+            blood_glucose_level=blood_glucose_level,
+            hypertension=hypertension,
+            heart_disease=heart_disease,
+            smoking_history=smoking_history
         )
 
         probability_percent = round(
             probability * 100,
-            2
+            1
         )
 
-        probability_percent = max(
-            0,
-            min(100, probability_percent)
-        )
-
+        print("Raw model probability:", round(model_probability * 100, 2), "%")
         print("Class 0:", prediction_result[0][0])
         print("Class 1:", prediction_result[0][1])
         print("Probability:", probability_percent, "%")
@@ -2503,21 +2573,24 @@ def simulate():
             )
         )
 
-        probability = float(
+        model_probability = float(
             prediction_result[0][1]
+        )
+
+        probability = calculate_risk_probability(
+            model_probability=model_probability,
+            age=input_data["age"].iloc[0],
+            bmi=input_data["bmi"].iloc[0],
+            hbA1c_level=input_data["hbA1c_level"].iloc[0],
+            blood_glucose_level=input_data["blood_glucose_level"].iloc[0],
+            hypertension=input_data["hypertension"].iloc[0],
+            heart_disease=input_data["heart_disease"].iloc[0],
+            smoking_history=input_data["smoking_history"].iloc[0]
         )
 
         probability_percent = round(
             probability * 100,
-            2
-        )
-
-        probability_percent = max(
-            0,
-            min(
-                100,
-                probability_percent
-            )
+            1
         )
 
         risk_tier = get_risk_tier(
